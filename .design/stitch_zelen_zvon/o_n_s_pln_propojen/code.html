@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="light" lang="cs"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>O nás | Zelený Zvon</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed-variant": "#3b4b36",
+              "on-error": "#ffffff",
+              "secondary-fixed": "#ffdf9f",
+              "surface-container-highest": "#e3e3de",
+              "surface-container-lowest": "#ffffff",
+              "on-primary": "#ffffff",
+              "surface-bright": "#faf9f4",
+              "primary-container": "#101f0d",
+              "inverse-on-surface": "#f2f1ec",
+              "on-primary-container": "#778970",
+              "background": "#faf9f4",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed": "#1b1c1c",
+              "tertiary-fixed-dim": "#c8c6c6",
+              "tertiary-container": "#1b1c1c",
+              "surface-dim": "#dbdad5",
+              "on-surface-variant": "#444841",
+              "outline": "#747870",
+              "surface-container-low": "#f5f4ef",
+              "secondary-fixed-dim": "#e7c274",
+              "inverse-primary": "#b9ccb0",
+              "surface": "#faf9f4",
+              "primary-fixed-dim": "#b9ccb0",
+              "on-background": "#1b1c19",
+              "inverse-surface": "#30312e",
+              "on-tertiary-container": "#848383",
+              "secondary-container": "#ffd888",
+              "surface-variant": "#e3e3de",
+              "on-primary-fixed": "#101f0d",
+              "outline-variant": "#c4c8be",
+              "secondary": "#765a17",
+              "on-tertiary": "#ffffff",
+              "on-secondary-fixed": "#261a00",
+              "on-surface": "#1b1c19",
+              "on-secondary-fixed-variant": "#5b4300",
+              "on-error-container": "#93000a",
+              "tertiary-fixed": "#e4e2e1",
+              "on-tertiary-fixed-variant": "#474747",
+              "surface-container-high": "#e9e8e3",
+              "surface-container": "#efeee9",
+              "surface-tint": "#52634c",
+              "error-container": "#ffdad6",
+              "primary-fixed": "#d5e8cb",
+              "primary": "#000000",
+              "on-secondary-container": "#795d19",
+              "on-secondary": "#ffffff",
+              "tertiary": "#000000"
+            },
+            fontFamily: {
+              "notoserif": ["Noto Serif", "serif"],
+              "plusjakarta": ["Plus Jakarta Sans", "sans-serif"],
+              "headline": ["Noto Serif"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "0.5rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .font-notoserif { font-family: 'Noto Serif', serif; }
+        .font-plusjakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-secondary-fixed">
+<!-- TopNavBar -->
+<nav class="bg-[#faf9f4] dark:bg-[#101f0d] bg-opacity-80 backdrop-blur-xl docked full-width top-0 sticky z-50 shadow-[0_20px_40px_rgba(15,30,12,0.04)]">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-8 py-4">
+<div class="text-2xl font-notoserif italic text-[#101f0d] dark:text-[#faf9f4] cursor-pointer" onclick="window.location.href='{{DATA:SCREEN:SCREEN_9}}'">Zelený Zvon</div>
+<div class="hidden md:flex items-center space-x-12">
+<a class="dark:text-[#faf9f4] hover:text-[#765a17] dark:hover:text-[#ffdf9f] transition-all duration-300 ease-in-out hover:opacity-80 font-notoserif tracking-wide text-[#765a17] dark:text-[#ffdf9f] border-b-2 border-[#765a17] dark:border-[#ffdf9f] pb-1" href="{{DATA:SCREEN:SCREEN_13}}">Studio</a>
+<a class="text-[#1b1c19] dark:text-[#faf9f4] hover:text-[#765a17] dark:hover:text-[#ffdf9f] transition-all duration-300 ease-in-out hover:opacity-80 font-notoserif tracking-wide" href="{{DATA:SCREEN:SCREEN_4}}">Služby</a>
+<a class="text-[#1b1c19] dark:text-[#faf9f4] hover:text-[#765a17] dark:hover:text-[#ffdf9f] transition-all duration-300 ease-in-out hover:opacity-80 font-notoserif tracking-wide" href="{{DATA:SCREEN:SCREEN_13}}">E-shop</a>
+</div>
+<div class="flex items-center space-x-6">
+<button class="transition-all duration-300 ease-in-out hover:opacity-80 text-[#101f0d] dark:text-[#faf9f4]">
+<span class="material-symbols-outlined">shopping_cart</span>
+</button>
+<button class="transition-all duration-300 ease-in-out hover:opacity-80 text-[#101f0d] dark:text-[#faf9f4]">
+<span class="material-symbols-outlined">person</span>
+</button>
+</div>
+</div>
+</nav>
+<main>
+<!-- Hero Section -->
+<section class="relative min-h-[716px] flex items-center overflow-hidden py-24">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover" data-alt="interior of a minimalist wellness studio with wooden accents, soft natural light, and green plants in clay pots" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARzGr1VHVYBhYYbuTuQByKGcNxr862gIrjJ4a9Rapf9LVTVRR_tiKFMdbC816xcg6z8OwOAGsqfJR7KC5Vq1ejrJUAXq8ilm_SxlsJlqOKkce7ZtoSYOoMMpakiOnqz0ZOydh3p4JaW1kUwW7UE9ofMw-cFCYc589Arvk6-sh1mKrRTsO027yIotyv0V_GhVwfPtf9PEMrRzW-ifOgYlyp6BS7VxwdZ5UkcOhiuQh0j9D-ECw2qhcIdHYt1a9oY5EipWpifx9DwXU"/>
+<div class="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent"></div>
+</div>
+<div class="relative z-10 max-w-7xl mx-auto px-8 w-full">
+<div class="max-w-2xl">
+<span class="inline-block py-1 px-4 mb-6 rounded-full bg-secondary-fixed text-on-secondary-fixed text-sm font-semibold tracking-widest uppercase font-plusjakarta">O nás</span>
+<h1 class="text-6xl md:text-7xl font-notoserif leading-tight text-primary-container mb-8">Hledání vnitřní rezonance</h1>
+<p class="text-xl font-plusjakarta leading-relaxed text-on-surface-variant max-w-xl">
+                        Zelený Zvon není jen studio. Je to prostor, kde se čas zpomaluje a kde každý zvuk, vůně a dotek mají svůj hluboký význam.
+                    </p>
+</div>
+</div>
+</section>
+<!-- Our Story / Náš příběh -->
+<section class="py-32 bg-surface">
+<div class="max-w-7xl mx-auto px-8">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-16 items-center">
+<div class="md:col-span-5 relative">
+<div class="aspect-[4/5] rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(15,30,12,0.06)]">
+<img class="w-full h-full object-cover" data-alt="portrait of a serene woman in natural linen clothing standing in a sunlit greenhouse filled with medicinal herbs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4Lc5oUAwq_QbX1gXEhRGvOplfVJUc5rRTK1tqoRpY0lnl7S83ofjVBBd-GuKIzvIITAyAivXchqQoio24hdGRo8Hcyl47xKdN_4_ZWn8MM3vxqHqmcm5oWEyycMQkOVPsu3egimkUsTBlxumElXbekmCxkgRtXGEa5PWB1EFNIr8OhNxnpjFOZaqK5D5HZxDIZ2_9MfvEAfQwuvc07Hfkxa0hOdPbjn8chwJPeqi2Tl3nHItvYaUaKFzs7pJdD4ySdj9x5C65Tks"/>
+</div>
+<div class="absolute -bottom-8 -right-8 w-48 h-48 bg-secondary-container rounded-xl -z-10 opacity-30"></div>
+</div>
+<div class="md:col-span-7">
+<h2 class="text-4xl font-notoserif text-primary-container mb-8">Náš příběh</h2>
+<div class="space-y-6 text-lg leading-relaxed text-on-surface-variant font-plusjakarta">
+<p class="italic text-primary-container font-medium text-xl border-l-4 border-secondary pl-6 mb-8">
+                                "Zelený Zvon vznikl z ticha. Z potřeby najít místo, které by rezonovalo s přírodou i naší duší ve světě, který je příliš hlasitý."
+                            </p>
+<p>
+                                Jmenuji se Klára a mou vizí bylo vytvořit útočiště, kde se moderní terapie potkává s tisíciletou moudrostí. Věřím, že každý z nás nese svůj vlastní 'zvon' – vnitřní harmonii, která se občas vychýlí z rytmu.
+                            </p>
+<p>
+                                Moje cesta začala studiem bylinek v podhůří a pokračovala přes certifikace v holistických terapiích až k otevření tohoto prostoru. Zelený Zvon je vyjádřením mé lásky k zemi a k lidskému potenciálu uzdravit se skrze klid.
+                            </p>
+<div class="pt-8">
+<span class="font-notoserif italic text-2xl text-secondary">Klára Novotná</span>
+<p class="text-sm font-plusjakarta text-on-surface-variant opacity-60">Zakladatelka &amp; Terapeutka</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Vision and Values / Naše vize a hodnoty -->
+<section class="py-32 bg-surface-container-low">
+<div class="max-w-7xl mx-auto px-8 text-center mb-20">
+<h2 class="text-4xl font-notoserif text-primary-container mb-4">Vize &amp; Hodnoty</h2>
+<div class="h-1 w-24 bg-secondary mx-auto"></div>
+</div>
+<div class="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Value 1 -->
+<div class="bg-surface p-12 rounded-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(15,30,12,0.04)]">
+<div class="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center text-on-primary mb-8">
+<span class="material-symbols-outlined text-3xl">nature_people</span>
+</div>
+<h3 class="text-2xl font-notoserif mb-4">Autenticita</h3>
+<p class="text-on-surface-variant leading-relaxed">
+                        Nepoužíváme zkratky. Naše produkty jsou čisté, naše terapie upřímné a náš přístup vždy lidský a osobní.
+                    </p>
+</div>
+<!-- Value 2 -->
+<div class="bg-surface p-12 rounded-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(15,30,12,0.04)]">
+<div class="w-16 h-16 bg-secondary rounded-full flex items-center justify-center text-on-secondary mb-8">
+<span class="material-symbols-outlined text-3xl">eco</span>
+</div>
+<h3 class="text-2xl font-notoserif mb-4">Udržitelnost</h3>
+<p class="text-on-surface-variant leading-relaxed">
+                        Respektujeme cykly přírody. Vše, co děláme, je s ohledem na dlouhodobé zdraví planety i našich klientů.
+                    </p>
+</div>
+<!-- Value 3 -->
+<div class="bg-surface p-12 rounded-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_20px_40_rgba(15,30,12,0.04)]">
+<div class="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center text-primary-container mb-8">
+<span class="material-symbols-outlined text-3xl">auto_awesome</span>
+</div>
+<h3 class="text-2xl font-notoserif mb-4">Inovace</h3>
+<p class="text-on-surface-variant leading-relaxed">
+                        Propojujeme tradiční techniky s novými poznatky o neurovědě a zvukovém léčení pro dosažení nejlepších výsledků.
+                    </p>
+</div>
+</div>
+</section>
+<!-- Atmosphere / Studio Space -->
+<section class="py-32 bg-surface">
+<div class="max-w-7xl mx-auto px-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+<div>
+<h2 class="text-4xl font-notoserif text-primary-container mb-8">Atmosféra ticha</h2>
+<p class="text-lg text-on-surface-variant mb-8 leading-relaxed font-plusjakarta">
+                            Náš prostor byl navržen jako rezonanční tělo. Použili jsme přírodní materiály jako hlínu, dubové dřevo a len, abychom vytvořili akusticky i vizuálně klidné prostředí.
+                        </p>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-6 rounded-xl">
+<span class="text-3xl font-notoserif text-secondary block mb-2">24°C</span>
+<span class="text-sm uppercase tracking-widest font-semibold opacity-60">Ideální teplota</span>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl">
+<span class="text-3xl font-notoserif text-secondary block mb-2">432Hz</span>
+<span class="text-sm uppercase tracking-widest font-semibold opacity-60">Léčivá frekvence</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-6 pt-12">
+<div class="rounded-xl overflow-hidden h-64">
+<img class="w-full h-full object-cover" data-alt="close up of a singing bowl sitting on a rough wooden table with morning sunlight hitting the brass surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWJ0vQdbqcNXMKAF20fMW34dPMscr55Y-qkKtoLr-JKz6K1C6xPeQmBAHfmoRg7B0VUQ7T3lA6HrpxDPwdj0kMBX7YjqvZgsHTCstyfliglJzUC2g9nzcEiqnOWaG6WUDA239zl8fd-w09ciTNIdgNkoCdHHpVjEsne1yHNyCOgKUoFfEXu2WXcjV2nRo7SsjnSgWDneR2lv-oX2E3x4x7TkeB9jEldibsGYeSBbLoTWZ_OQ7P-UUS2C7894ExhzaLad4aJ8-hDUg"/>
+</div>
+<div class="rounded-xl overflow-hidden h-80">
+<img class="w-full h-full object-cover" data-alt="meditation corner with soft floor cushions, a small water fountain and a large monstera plant in a terracotta pot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgfyeQuUAriVkj5TWEsjSE5fO9sP9M7K9rHmAvUOLfm2e3YH7mGKD9UzjV4s45u72FMvYiP8rtMeIxqHxP5SlN14crWSfU4Rw04_6XgFMEkfORrVBjs4iAyiJM7LsxeoroDNDCD3LANy7K7wuO1FvdSlOPUZJSlP-1APPKYsEJ3Hpdw88Y6zuU75sCHYSbSjd6LEYQv2vwwh7AwpjL-kdIx2IIvqEUA0kCGQh8ZrnL7jL8NY0atSadBSrI2eFqRXxOTQkRARuIQHg"/>
+</div>
+</div>
+<div class="space-y-6">
+<div class="rounded-xl overflow-hidden h-80">
+<img class="w-full h-full object-cover" data-alt="wide shot of a clean minimal therapy room with a massage table covered in white linen and eucalyptus sprigs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdNm67yXh89A8UEXcZnWHb9SKlN8m2VEpHX7dNYufbJkgUC8RxlVhhavfjYepb89dBE1L3rzLL-9yM-Hy9EcZs5wxbbWkJlnaW3SwWz3LGkRGDjN-6ApaDqRGKrH7Q7GHCw28inX_k5Y5iaRwneWrLPdO57ow15_TcTPzDd3RyzbH3DPOWXosN4DQI8Qo33Aiunhp9VGzYAMK7YLD32eByZKepzKHmwVBFU2-Szr6GGlwd8SGTbtKF4oYo1NPgwA4EiAXakzn3xBM"/>
+</div>
+<div class="rounded-xl overflow-hidden h-64">
+<img class="w-full h-full object-cover" data-alt="architectural detail of a textured clay wall with a niche containing a small green bell sculpture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBH8NjN1bjjMKJ2SJAlZnWS6jNdIQVBBrAcGurOUejQf5CC1KdTFNBdmJDDlOIgqPt4UsoHdARlugkcH5YP9e0RPj4BOZykNZvlfMFj3Ae8yPhniLYl-gk5VhedWcJ4hlCS6hjwuzszQsOpDu-5LEuRM9fySlrJEzOHpMWM36XNFY0fWCC6jPCn18LnRVB8PI8kUwCRJkdm8_MWd0YWYLBsL9YLOkQf37RmLlfHyglc1mc3MOE5PjRGJiRsQE_RHFT-GLVc7LkeRfc"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Our Team / Náš tým -->
+<section class="py-32 bg-primary-container text-on-primary">
+<div class="max-w-7xl mx-auto px-8">
+<div class="mb-16 flex flex-col md:flex-row md:items-end md:justify-between">
+<div>
+<h2 class="text-4xl font-notoserif mb-4">Náš tým</h2>
+<p class="text-on-primary-container max-w-lg">Průvodci na vaší cestě k harmonii. Každý z nás přináší unikátní pohled a specializaci.</p>
+</div>
+<div class="mt-8 md:mt-0">
+<button class="bg-secondary-fixed text-on-secondary-fixed px-8 py-4 rounded-full font-semibold hover:bg-secondary-fixed-dim transition-colors">Přidejte se k nám</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+<!-- Team Member 1 -->
+<div class="group">
+<div class="relative mb-6 overflow-hidden rounded-xl aspect-square">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="smiling woman with glasses and long brown hair wearing a simple white linen shirt" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLsa2vhr6WytHlsqYaU4yOv6sgSYYZQQei9o70MyE3H0DuIMJ_76nRpt9K3vsS7y22-dpewAtjD7i-I0thWkcF2Y6c96Rfyv7KVTRP6cAdetbBL5_O9oo7ZWSld58QqgpsBRHAe9uPQXXt1-Ds6_RaWX5Vk5C2OLE2EonLrQopT3BkglPs56y7GDn5_vVIzTVGZQl0UYuAoAy1WCoYyJslw8UtZbi3PrMYFsYz6H4ipLvxiwtEWDZEIjOjHrajPnGhuWno-jfsJMM"/>
+<div class="absolute inset-0 bg-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+</div>
+<h3 class="text-2xl font-notoserif mb-1">Klára Novotná</h3>
+<p class="text-on-primary-container font-plusjakarta uppercase tracking-widest text-xs mb-4">Founder &amp; Sound Healer</p>
+<p class="text-sm opacity-80 leading-relaxed">Expertka na vibrační medicínu a fytoterapii s 15letou praxí v oboru holistického zdraví.</p>
+</div>
+<!-- Team Member 2 -->
+<div class="group">
+<div class="relative mb-6 overflow-hidden rounded-xl aspect-square">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="middle-aged man with a kind expression and beard in a navy blue organic cotton t-shirt" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-NrF7_KzigsUuYg6rDSNvRsHB4fiiXxsFiCJWjkqwBoANWJ6t30Kb9zAgNzriiQLDp9Y9OgwwccxQTT-i9v1hj5vVW8yPt0CX7XTRWjkFiHdjFpmvTi2dDH8xS8uI4GB42j7NPPAommVvdBPuuRg6GlFvO9wErCPVq3KV7I1RBd6GuPG3N6gRlAOwhwsHwDYJpEMTb1lRRhaeM3KB3iCtL4kFeoLz1YHrzJH-HOeviK46wKfRBDP5Q86zwgjodhhMXpfQ_Gvt-4M"/>
+<div class="absolute inset-0 bg-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+</div>
+<h3 class="text-2xl font-notoserif mb-1">Tomáš Bareš</h3>
+<p class="text-on-primary-container font-plusjakarta uppercase tracking-widest text-xs mb-4">Breathwork Coach</p>
+<p class="text-sm opacity-80 leading-relaxed">Specialista na dechové techniky a mindfulness, který vám pomůže ovládnout stres v každodenním životě.</p>
+</div>
+<!-- Team Member 3 -->
+<div class="group">
+<div class="relative mb-6 overflow-hidden rounded-xl aspect-square">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="young woman with blonde hair tied in a bun wearing a yoga outfit in a soft cream color" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6I40sDxqnAkoaRYTs7_XYc_GWPxXJXUNSm_wWPZNs1bDwjuPgYT-EHo_0UrK47zF_QViA57kbKFuCC8U0vgyzBz5cUyzguhB0-dDZvMQRHqcFjtEciMfcvC0_-rW9RE493no9ReDlcdHQOXD6P4HpKhVP16QkhA9xwZo6r8EdKrAg5HrHk4dW_Z1m5NG2BewSTof8skUCFzXcX8yytnsE35n2PFIHui52rPQARGdbYvRbub1uMQCEBmyxSQg5U6eCyB8lJgiFpNU"/>
+<div class="absolute inset-0 bg-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+</div>
+<h3 class="text-2xl font-notoserif mb-1">Eliška Malá</h3>
+<p class="text-on-primary-container font-plusjakarta uppercase tracking-widest text-xs mb-4">Movement Specialist</p>
+<p class="text-sm opacity-80 leading-relaxed">Její lekce jógy a somatického pohybu jsou navrženy tak, aby obnovily plynulost a lehkost vašeho těla.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA & Contact -->
+<section class="py-32 bg-surface">
+<div class="max-w-7xl mx-auto px-8">
+<div class="bg-surface-container-low rounded-xl p-12 md:p-24 flex flex-col md:flex-row gap-16 items-center">
+<div class="flex-1">
+<h2 class="text-5xl font-notoserif text-primary-container mb-6">Začněte svou cestu ještě dnes</h2>
+<p class="text-xl text-on-surface-variant mb-10 font-plusjakarta leading-relaxed">
+                            Rádi vás uvidíme u nás ve studiu v srdci Prahy. Zastavte se na čaj nebo si rezervujte svou první konzultaci.
+                        </p>
+<div class="flex flex-wrap gap-4">
+<a class="bg-primary-container text-on-primary px-10 py-5 rounded-full font-semibold text-lg hover:shadow-xl transition-all inline-block" href="{{DATA:SCREEN:SCREEN_8}}">Rezervovat sezení</a>
+<button class="bg-white border border-outline-variant text-primary-container px-10 py-5 rounded-full font-semibold text-lg hover:bg-surface-container-high transition-all">Naše služby</button>
+</div>
+</div>
+<div class="w-full md:w-1/3 space-y-8">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary text-2xl">location_on</span>
+<div>
+<h4 class="font-notoserif text-lg">Kde nás najdete</h4>
+<p class="text-on-surface-variant">Rezidenční čtvrť, Zvonná 12<br/>Praha 1, 110 00</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary text-2xl">mail</span>
+<div>
+<h4 class="font-notoserif text-lg">Napište nám</h4>
+<p class="text-on-surface-variant">ahoj@zelenyzvon.cz</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary text-2xl">schedule</span>
+<div>
+<h4 class="font-notoserif text-lg">Otevírací doba</h4>
+<p class="text-on-surface-variant">Po - Pá: 08:00 - 20:00<br/>So: 09:00 - 15:00</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#f5f4ef] dark:bg-[#0f1e0c] full-width rounded-t-[1.5rem] mt-20">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 max-w-7xl mx-auto px-8 py-16">
+<div class="md:col-span-1">
+<span class="text-xl font-notoserif text-[#101f0d] dark:text-[#faf9f4] mb-4 block cursor-pointer" onclick="window.location.href='{{DATA:SCREEN:SCREEN_9}}'">Zelený Zvon</span>
+<p class="text-[#1b1c19] opacity-70 font-plusjakarta leading-relaxed">
+                    Váš vnitřní klid začíná rezonancí s přírodou.
+                </p>
+</div>
+<div>
+<h4 class="font-notoserif font-bold text-[#1b1c19] dark:text-[#faf9f4] mb-6">Menu</h4>
+<ul class="space-y-4"><li><a class="text-[#1b1c19] opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors font-plusjakarta" href="{{DATA:SCREEN:SCREEN_13}}">O nás</a></li><li><a class="text-[#1b1c19] opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors font-plusjakarta" href="{{DATA:SCREEN:SCREEN_7}}">Studio</a></li><li><a class="text-[#1b1c19] opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors font-plusjakarta" href="{{DATA:SCREEN:SCREEN_13}}">E-shop</a></li></ul>
+</div>
+<div>
+<h4 class="font-notoserif font-bold text-[#1b1c19] dark:text-[#faf9f4] mb-6">Informace</h4>
+<ul class="space-y-4">
+<li><a class="text-[#1b1c19] opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors font-plusjakarta" href="#">Newsletter</a></li>
+<li><a class="text-[#1b1c19] opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors font-plusjakarta" href="#">Ochrana údajů</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-notoserif font-bold text-[#1b1c19] dark:text-[#faf9f4] mb-6">Newsletter</h4>
+<p class="text-xs text-[#1b1c19] opacity-70 mb-4 font-plusjakarta">Odebírejte novinky a pozvánky na naše akce.</p>
+<div class="flex gap-2">
+<input class="bg-surface border-none rounded-lg px-4 py-2 w-full text-sm focus:ring-1 focus:ring-secondary" placeholder="Váš e-mail" type="email"/>
+<button class="bg-secondary text-on-secondary px-4 py-2 rounded-lg"><span class="material-symbols-outlined text-sm">send</span></button>
+</div>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-8 pb-12 border-t border-outline-variant/10 pt-8">
+<p class="text-sm text-[#1b1c19] opacity-50 font-plusjakarta">© 2024 Zelený Zvon. Vytvořeno pro váš vnitřní klid.</p>
+</div>
+</footer>
+</body></html>

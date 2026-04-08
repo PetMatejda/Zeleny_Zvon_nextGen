@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html lang="cs"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed-variant": "#3b4b36",
+              "on-error": "#ffffff",
+              "secondary-fixed": "#ffdf9f",
+              "surface-container-highest": "#e3e3de",
+              "surface-container-lowest": "#ffffff",
+              "on-primary": "#ffffff",
+              "surface-bright": "#faf9f4",
+              "primary-container": "#101f0d",
+              "inverse-on-surface": "#f2f1ec",
+              "on-primary-container": "#778970",
+              "background": "#faf9f4",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed": "#1b1c1c",
+              "tertiary-fixed-dim": "#c8c6c6",
+              "tertiary-container": "#1b1c1c",
+              "surface-dim": "#dbdad5",
+              "on-surface-variant": "#444841",
+              "outline": "#747870",
+              "surface-container-low": "#f5f4ef",
+              "secondary-fixed-dim": "#e7c274",
+              "inverse-primary": "#b9ccb0",
+              "surface": "#faf9f4",
+              "primary-fixed-dim": "#b9ccb0",
+              "on-background": "#1b1c19",
+              "inverse-surface": "#30312e",
+              "on-tertiary-container": "#848383",
+              "secondary-container": "#ffd888",
+              "surface-variant": "#e3e3de",
+              "on-primary-fixed": "#101f0d",
+              "outline-variant": "#c4c8be",
+              "secondary": "#765a17",
+              "on-tertiary": "#ffffff",
+              "on-secondary-fixed": "#261a00",
+              "on-surface": "#1b1c19",
+              "on-secondary-fixed-variant": "#5b4300",
+              "on-error-container": "#93000a",
+              "tertiary-fixed": "#e4e2e1",
+              "on-tertiary-fixed-variant": "#474747",
+              "surface-container-high": "#e9e8e3",
+              "surface-container": "#efeee9",
+              "surface-tint": "#52634c",
+              "error-container": "#ffdad6",
+              "primary-fixed": "#d5e8cb",
+              "primary": "#000000",
+              "on-secondary-container": "#795d19",
+              "on-secondary": "#ffffff",
+              "tertiary": "#000000"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .font-notoserif { font-family: 'Noto Serif', serif; }
+        .font-plusjakarta { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- TopNavBar -->
+<nav class="bg-[#faf9f4] dark:bg-[#101f0d] bg-opacity-80 backdrop-blur-xl docked full-width top-0 sticky z-50 shadow-[0_20px_40px_rgba(15,30,12,0.04)]">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-8 py-4">
+<a class="text-2xl font-notoserif italic text-[#101f0d] dark:text-[#faf9f4]" href="{{DATA:SCREEN:SCREEN_7}}">Zelený Zvon</a>
+<div class="hidden md:flex items-center space-x-8 font-notoserif tracking-wide">
+<a class="text-[#1b1c19] dark:text-[#faf9f4] hover:text-[#765a17] dark:hover:text-[#ffdf9f] transition-all duration-300 ease-in-out hover:opacity-80" href="{{DATA:SCREEN:SCREEN_5}}">Studio</a>
+<a class="text-[#765a17] dark:text-[#ffdf9f] border-b-2 border-[#765a17] dark:border-[#ffdf9f] pb-1 transition-all duration-300 ease-in-out hover:opacity-80" href="{{DATA:SCREEN:SCREEN_7}}#sluzby">Služby</a>
+<a class="text-[#1b1c19] dark:text-[#faf9f4] hover:text-[#765a17] dark:hover:text-[#ffdf9f] transition-all duration-300 ease-in-out hover:opacity-80" href="{{DATA:SCREEN:SCREEN_6}}">E-shop</a>
+</div>
+<div class="flex items-center space-x-6">
+<button class="text-[#1b1c19] dark:text-[#faf9f4] transition-transform duration-200 scale-98">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+</button>
+<button class="text-[#1b1c19] dark:text-[#faf9f4] transition-transform duration-200 scale-98">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+</div>
+</div>
+</nav>
+<main>
+<!-- Hero Section -->
+<section class="relative min-h-[716px] flex items-center overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover brightness-90" data-alt="Soft sunlight filtering through deep green forest canopy with gentle morning mist and serene atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAF8IETPZtg25bDq5le1lK4b9FxAZiPUDLD_OFO6jobDOan3q3woqjmbhdUeHEmpKLgS3O1e-EQlNjrodLbEdr85dXEISNBvogWFpGorHPNDcqKhMGmPoKeIKoFdUSX8JYiSdA5GisZ9-jyDVv11o-eNnVw8i2_aTi4m9x_sTtDWsjoBFW56qumrBy1mH1taqQZz5DL_CmE9IcDf9rOE23fBbcWinC8NjyS55UMeaQjo3KYlrpbRFvbWZCTPfedidxCV8NbpIP3GAw"/>
+<div class="absolute inset-0 bg-gradient-to-r from-primary-container/60 to-transparent"></div>
+</div>
+<div class="relative z-10 max-w-7xl mx-auto px-8 w-full">
+<div class="max-w-2xl">
+<span class="inline-block px-4 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-sm font-medium mb-6">Metoda uvolnění napětí</span>
+<h1 class="text-5xl md:text-7xl font-headline text-white leading-tight mb-8">Metoda TRE®</h1>
+<p class="text-xl text-white/90 leading-relaxed font-light mb-10">
+                        Cesta k vnitřnímu klidu skrze přirozený mechanismus těla. Zbavte se hluboko uloženého stresu a napětí jemnou a bezpečnou cestou.
+                    </p>
+<a class="inline-flex items-center px-8 py-4 bg-secondary text-white rounded-lg font-medium transition-all hover:bg-secondary/90 hover:shadow-xl transform hover:-translate-y-1" href="#booking">
+                        Rezervovat termín
+                        <span class="material-symbols-outlined ml-2" data-icon="arrow_forward">arrow_forward</span>
+</a>
+</div>
+</div>
+</section>
+<!-- Description Section -->
+<section class="py-24 bg-surface">
+<div class="max-w-7xl mx-auto px-8">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+<div class="lg:col-span-7">
+<h2 class="text-3xl md:text-4xl font-headline mb-8 text-primary">Co je to TRE® a jak funguje?</h2>
+<div class="space-y-6 text-on-surface-variant text-lg leading-relaxed">
+<p>
+                                TRE® (Tension, Stress &amp; Trauma Release Exercises) je revoluční metoda, která pomáhá tělu uvolnit hluboké svalové vzorce stresu, napětí a traumatu. Metoda byla vyvinuta Dr. Davidem Bercelim a je založena na aktivaci přirozeného reflexního mechanismu těla — jemného třesu nebo vibrací.
+                            </p>
+<p>
+                                Tento mechanismus má každý savec. Všimli jste si někdy, jak se pes po bouřce nebo leknutí oklepe? Lidé tento instinkt v průběhu evoluce potlačili. TRE® jej bezpečně znovu aktivuje, což umožňuje nervové soustavě přepnout z režimu "bojuj nebo uteč" do stavu hlubokého klidu a regenerace.
+                            </p>
+<div class="flex gap-4 pt-4">
+<div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/10">
+<span class="material-symbols-outlined text-secondary block mb-2" data-icon="psychology">psychology</span>
+<span class="font-semibold block text-primary">Nervový systém</span>
+<span class="text-sm">Harmonizace vagového nervu.</span>
+</div>
+<div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/10">
+<span class="material-symbols-outlined text-secondary block mb-2" data-icon="architecture">architecture</span>
+<span class="font-semibold block text-primary">Somatické uvolnění</span>
+<span class="text-sm">Práce s hlubokým svalstvem psoas.</span>
+</div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-5">
+<div class="relative">
+<img class="rounded-xl shadow-2xl relative z-10 aspect-[4/5] object-cover" data-alt="Minimalist yoga studio interior with organic textures, wooden floors, and soft warm lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9RFwvViUViF1jmV6MmeFodDwH4zPSxPENyRcYYOAQozpaTm4NDiaJHyNTgN_U4NNZYNFeDt1KTH_rSf3jXkjLxUj2rPDPhFtAfS7N3kpuCbfI09kGSPrHNXftFdMWf1xkHzIwntGb33glOAw_sjqJsnMwA70lWWKe_d4Wq0OMZgtc-d7q0REAY7kWiMzbR0eXVHTt5qRlx-ca_e8j5t-AkRUtEU4paNSYzaDPJKZMjcBJJaVL64x4z1lpZB9OmV1zKYzQZqSOhlo"/>
+<div class="absolute -bottom-6 -left-6 w-full h-full bg-secondary-fixed/30 -z-10 rounded-xl"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- What to Expect & Benefits (Asymmetric Grid) -->
+<section class="py-24 bg-surface-container-low">
+<div class="max-w-7xl mx-auto px-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<!-- What to Expect -->
+<div class="bg-surface p-12 rounded-xl shadow-sm">
+<h3 class="text-2xl font-headline mb-8 text-primary">Co vás čeká při lekci</h3>
+<ul class="space-y-6">
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary mt-1" data-icon="check_circle">check_circle</span>
+<div>
+<span class="font-bold block text-primary">Úvodní rozhovor</span>
+<p class="text-on-surface-variant">Zmapování vašich potřeb a seznámení se s principy metody.</p>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary mt-1" data-icon="check_circle">check_circle</span>
+<div>
+<span class="font-bold block text-primary">Série 7 cviků</span>
+<p class="text-on-surface-variant">Jednoduché somatické cviky, které jemně unaví konkrétní svalové skupiny.</p>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary mt-1" data-icon="check_circle">check_circle</span>
+<div>
+<span class="font-bold block text-primary">Fáze uvolnění</span>
+<p class="text-on-surface-variant">Leh na podložce a spuštění přirozeného neurogenního chvění.</p>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary mt-1" data-icon="check_circle">check_circle</span>
+<div>
+<span class="font-bold block text-primary">Integrace</span>
+<p class="text-on-surface-variant">Závěrečný odpočinek pro vstřebání prožitku a uklidnění systému.</p>
+</div>
+</li>
+</ul>
+</div>
+<!-- Benefits Bento Style -->
+<div class="grid grid-cols-2 gap-6">
+<div class="col-span-2 bg-primary-container p-8 rounded-xl text-white">
+<span class="material-symbols-outlined text-secondary-fixed mb-4" data-icon="spa">spa</span>
+<h4 class="text-xl font-headline mb-2">Celková regenerace</h4>
+<p class="opacity-80">TRE® působí na nejhlubší úrovni nervové soustavy, což přináší pocit lehkosti, který přetrvává dny.</p>
+</div>
+<div class="bg-surface-container-high p-6 rounded-xl">
+<span class="material-symbols-outlined text-secondary mb-3" data-icon="bedtime">bedtime</span>
+<h5 class="font-bold mb-1">Lepší spánek</h5>
+<p class="text-sm opacity-70">Zmírnění nespavosti a nočního napětí.</p>
+</div>
+<div class="bg-secondary-fixed/20 p-6 rounded-xl">
+<span class="material-symbols-outlined text-secondary mb-3" data-icon="mood">mood</span>
+<h5 class="font-bold mb-1">Emoční stabilita</h5>
+<p class="text-sm opacity-70">Snížení úzkosti a větší odolnost vůči stresu.</p>
+</div>
+<div class="col-span-2 bg-surface p-8 rounded-xl border border-outline-variant/20">
+<h5 class="font-bold mb-4 flex items-center">
+<span class="material-symbols-outlined mr-2 text-secondary" data-icon="groups">groups</span>
+                                Pro koho je TRE® určeno?
+                            </h5>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container-low rounded-full text-xs font-medium">Vytížení manažeři</span>
+<span class="px-3 py-1 bg-surface-container-low rounded-full text-xs font-medium">Lidé s úzkostmi</span>
+<span class="px-3 py-1 bg-surface-container-low rounded-full text-xs font-medium">Sportovci po výkonu</span>
+<span class="px-3 py-1 bg-surface-container-low rounded-full text-xs font-medium">Každý, kdo hledá klid</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Testimonial -->
+<section class="py-24 overflow-hidden">
+<div class="max-w-4xl mx-auto px-8 text-center">
+<span class="material-symbols-outlined text-5xl text-secondary-fixed mb-8" data-icon="format_quote" data-weight="fill">format_quote</span>
+<blockquote class="text-2xl md:text-3xl font-headline italic leading-relaxed text-primary mb-10">
+                    "Po první lekci TRE® jsem poprvé po letech spala celou noc bez probuzení. Je to neuvěřitelné, jak tělo přesně ví, co má dělat, když mu k tomu dáte prostor."
+                </blockquote>
+<div class="flex items-center justify-center gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Portrait of a serene woman in her late 30s with a natural look and soft smile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYnaDdXrtJMjO2uQB6AljfxQOOPS3qFFXZZjsR3cM7KlVXH39O1EXcsrtvMKpUsf9CULeED8D1lQk2SdT7MSbJFHsIepL30kCZJ5eAFhUG2oIv9IfnPrIWndqwa9ZUBKa_PG-_q1NiIQTD2U1GWnZujVQGoeAwVgm3tZOKYSqpKo6_Qfi_7AFOqu8QJ4-S-KzZ8yD8nJ5C9JNCYnSfPu5bnwUN0SlmH4N1XXu4fI1tH6YPszdH_gCTXPJr4cVryMflTy-XIiumW18"/>
+</div>
+<div class="text-left">
+<span class="block font-bold">Martina K.</span>
+<span class="text-sm text-on-surface-variant">Klientka studia, 6 měsíců praxe</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Pricing & Booking -->
+<section class="py-24 bg-surface" id="booking">
+<div class="max-w-7xl mx-auto px-8">
+<div class="text-center mb-16">
+<h2 class="text-4xl font-headline mb-4">Ceník a rezervace</h2>
+<p class="text-on-surface-variant">Vyberte si formu setkání, která vám nejlépe vyhovuje.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+<!-- Option 1 -->
+<div class="bg-surface-container-low p-8 rounded-xl border border-transparent hover:border-secondary transition-all flex flex-col">
+<h4 class="text-xl font-bold mb-2">Individuální lekce</h4>
+<p class="text-sm text-on-surface-variant mb-6">60-75 minut plné pozornosti</p>
+<div class="text-3xl font-headline text-primary mb-8">1 500 Kč</div>
+<ul class="space-y-3 text-sm mb-10 flex-grow">
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-lg" data-icon="check">check</span> Bezpečné vedení</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-lg" data-icon="check">check</span> Konzultace historie</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-lg" data-icon="check">check</span> Individuální tempo</li>
+</ul>
+<button class="w-full py-3 bg-primary-container text-white rounded font-medium hover:bg-black transition-colors" onclick="window.location.href='#footer'">Vybrat termín</button>
+</div>
+<!-- Option 2 (Featured) -->
+<div class="bg-white p-8 rounded-xl border-2 border-secondary shadow-xl transform md:scale-105 z-10 flex flex-col">
+<div class="bg-secondary text-white text-[10px] uppercase tracking-widest font-bold py-1 px-3 rounded-full self-start mb-4">Doporučeno</div>
+<h4 class="text-xl font-bold mb-2">Balíček 3 lekcí</h4>
+<p class="text-sm text-on-surface-variant mb-6">Pro hlubší proces uvolnění</p>
+<div class="text-3xl font-headline text-primary mb-8">4 000 Kč</div>
+<ul class="space-y-3 text-sm mb-10 flex-grow">
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-lg" data-icon="check">check</span> Výraznější posun</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-lg" data-icon="check">check</span> Nácvik pro domácí praxi</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-lg" data-icon="check">check</span> Zvýhodněná cena</li>
+</ul>
+<button class="w-full py-3 bg-secondary text-white rounded font-medium hover:bg-secondary/90 transition-colors" onclick="window.location.href='#footer'">Vybrat termín</button>
+</div>
+<!-- Option 3 -->
+<div class="bg-surface-container-low p-8 rounded-xl border border-transparent hover:border-secondary transition-all flex flex-col">
+<h4 class="text-xl font-bold mb-2">Skupinový kurz</h4>
+<p class="text-sm text-on-surface-variant mb-6">Max 8 účastníků</p>
+<div class="text-3xl font-headline text-primary mb-8">600 Kč</div>
+<ul class="space-y-3 text-sm mb-10 flex-grow">
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-lg" data-icon="check">check</span> Sdílená energie skupiny</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-lg" data-icon="check">check</span> Pravidelná praxe</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-lg" data-icon="check">check</span> Komunitní atmosféra</li>
+</ul>
+<button class="w-full py-3 bg-primary-container text-white rounded font-medium hover:bg-black transition-colors" onclick="window.location.href='#footer'">Vybrat termín</button>
+</div>
+</div>
+</div>
+</section>
+<!-- FAQ Section -->
+<section class="py-24 bg-surface-container-low">
+<div class="max-w-4xl mx-auto px-8">
+<h2 class="text-3xl font-headline mb-12 text-center">Časté otázky o TRE®</h2>
+<div class="space-y-4">
+<div class="bg-surface p-6 rounded-xl">
+<h5 class="font-bold mb-2 flex justify-between items-center cursor-pointer">
+                            Je třes bezpečný?
+                            <span class="material-symbols-outlined text-secondary" data-icon="expand_more">expand_more</span>
+</h5>
+<p class="text-on-surface-variant leading-relaxed">
+                            Ano, naprosto. Chvění je přirozený biologický proces. Klíčem k metodě je "seberegulace" – učíme vás, jak proces kdykoliv zastavit pouhým narovnáním nohou. Celý proces máte plně pod kontrolou.
+                        </p>
+</div>
+<div class="bg-surface p-6 rounded-xl">
+<h5 class="font-bold mb-2 flex justify-between items-center cursor-pointer">
+                            Kolik lekcí budu potřebovat?
+                            <span class="material-symbols-outlined text-secondary" data-icon="expand_more">expand_more</span>
+</h5>
+<p class="text-on-surface-variant leading-relaxed">
+                            Obvykle doporučujeme 3 až 5 vedených lekcí, abyste se naučili metodu bezpečně provádět sami doma. Někteří pocítí úlevu hned poprvé, u jiných se mechanismus spouští postupně.
+                        </p>
+</div>
+<div class="bg-surface p-6 rounded-xl">
+<h5 class="font-bold mb-2 flex justify-between items-center cursor-pointer">
+                            Existují nějaké kontraindikace?
+                            <span class="material-symbols-outlined text-secondary" data-icon="expand_more">expand_more</span>
+</h5>
+<p class="text-on-surface-variant leading-relaxed">
+                            Metoda není vhodná pro těhotné ženy a osoby s čerstvými pooperačními stavy v oblasti břicha a páteře. Pokud trpíte vážným psychiatrickým onemocněním nebo epilepsií, je nutná konzultace s lékařem.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#f5f4ef] dark:bg-[#0f1e0c] text-[#1b1c19] dark:text-[#faf9f4] full-width rounded-t-[1.5rem] mt-20" id="footer">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 max-w-7xl mx-auto px-8 py-16 font-plusjakarta leading-[1.6]">
+<div>
+<span class="text-xl font-notoserif text-[#101f0d] dark:text-[#faf9f4] mb-4 block">Zelený Zvon</span>
+<p class="opacity-70 text-sm italic">Místo, kde se zvuk harmonie potkává s tichem duše.</p>
+</div>
+<div>
+<h6 class="font-notoserif font-bold mb-6">Navigace</h6>
+<ul class="space-y-3"><li><a class="text-[#1b1c19] opacity-70 hover:opacity-100 hover:text-[#765a17] dark:hover:text-[#ffdf9f] transition-colors" href="{{DATA:SCREEN:SCREEN_5}}">O nás</a></li><li><a class="text-[#1b1c19] opacity-70 hover:opacity-100 hover:text-[#765a17] dark:hover:text-[#ffdf9f] transition-colors" href="{{DATA:SCREEN:SCREEN_7}}">Studio</a></li><li><a class="text-[#1b1c19] opacity-70 hover:opacity-100 hover:text-[#765a17] dark:hover:text-[#ffdf9f] transition-colors" href="{{DATA:SCREEN:SCREEN_6}}">E-shop</a></li><li><a class="text-[#1b1c19] opacity-70 hover:opacity-100 hover:text-[#765a17] dark:hover:text-[#ffdf9f] transition-colors" href="#">Kontakt</a></li></ul>
+</div>
+<div>
+<h6 class="font-notoserif font-bold mb-6">Kontakt</h6>
+<p class="text-sm opacity-70 mb-2">info@zelenyzvon.cz</p>
+<p class="text-sm opacity-70">Praha 1, Malostranské náměstí</p>
+</div>
+<div>
+<h6 class="font-notoserif font-bold mb-6">Otevírací doba</h6>
+<p class="text-sm opacity-70 mb-2">Po – Pá: 08:00 – 20:00</p>
+<p class="text-sm opacity-70">So – Ne: Individuální kurzy</p>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-8 pb-8 text-center text-xs opacity-50 border-t border-outline-variant/10 pt-8">
+            © 2024 Zelený Zvon. Vytvořeno pro váš vnitřní klid.
+        </div>
+</footer>
+</body></html>

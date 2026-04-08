@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html lang="cs"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-primary-fixed-variant": "#3b4b36",
+              "on-error": "#ffffff",
+              "secondary-fixed": "#ffdf9f",
+              "surface-container-highest": "#e3e3de",
+              "surface-container-lowest": "#ffffff",
+              "on-primary": "#ffffff",
+              "surface-bright": "#faf9f4",
+              "primary-container": "#101f0d",
+              "inverse-on-surface": "#f2f1ec",
+              "on-primary-container": "#778970",
+              "background": "#faf9f4",
+              "error": "#ba1a1a",
+              "on-tertiary-fixed": "#1b1c1c",
+              "tertiary-fixed-dim": "#c8c6c6",
+              "tertiary-container": "#1b1c1c",
+              "surface-dim": "#dbdad5",
+              "on-surface-variant": "#444841",
+              "outline": "#747870",
+              "surface-container-low": "#f5f4ef",
+              "secondary-fixed-dim": "#e7c274",
+              "inverse-primary": "#b9ccb0",
+              "surface": "#faf9f4",
+              "primary-fixed-dim": "#b9ccb0",
+              "on-background": "#1b1c19",
+              "inverse-surface": "#30312e",
+              "on-tertiary-container": "#848383",
+              "secondary-container": "#ffd888",
+              "surface-variant": "#e3e3de",
+              "on-primary-fixed": "#101f0d",
+              "outline-variant": "#c4c8be",
+              "secondary": "#765a17",
+              "on-tertiary": "#ffffff",
+              "on-secondary-fixed": "#261a00",
+              "on-surface": "#1b1c19",
+              "on-secondary-fixed-variant": "#5b4300",
+              "on-error-container": "#93000a",
+              "tertiary-fixed": "#e4e2e1",
+              "on-tertiary-fixed-variant": "#474747",
+              "surface-container-high": "#e9e8e3",
+              "surface-container": "#efeee9",
+              "surface-tint": "#52634c",
+              "error-container": "#ffdad6",
+              "primary-fixed": "#d5e8cb",
+              "primary": "#000000",
+              "on-secondary-container": "#795d19",
+              "on-secondary": "#ffffff",
+              "tertiary": "#000000"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif"],
+              "body": ["Plus Jakarta Sans"],
+              "label": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "0.5rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #faf9f4;
+            color: #1b1c19;
+        }
+        h1, h2, h3, .font-notoserif {
+            font-family: 'Noto Serif', serif;
+        }
+        .glass-nav {
+            background-color: rgba(250, 249, 244, 0.8);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- TopNavBar -->
+<nav class="docked full-width top-0 sticky z-50 bg-[#faf9f4] bg-opacity-80 backdrop-blur-xl shadow-[0_20px_40px_rgba(15,30,12,0.04)]">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-8 py-4">
+<div class="flex items-center gap-8">
+<a class="text-2xl font-notoserif italic text-[#101f0d] tracking-wide" href="{{DATA:SCREEN:SCREEN_7}}">Zelený Zvon</a>
+<div class="hidden md:flex gap-8 items-center">
+<a class="font-notoserif tracking-wide text-[#1b1c19] hover:text-[#765a17] transition-all duration-300 ease-in-out" href="{{DATA:SCREEN:SCREEN_5}}">Studio</a>
+<a class="font-notoserif tracking-wide text-[#1b1c19] hover:text-[#765a17] transition-all duration-300 ease-in-out" href="{{DATA:SCREEN:SCREEN_7}}#sluzby">Služby</a>
+<a class="font-notoserif tracking-wide text-[#765a17] border-b-2 border-[#765a17] pb-1" href="{{DATA:SCREEN:SCREEN_6}}">E-shop</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center bg-surface-container-low px-4 py-2 rounded-full">
+<span class="material-symbols-outlined text-outline text-sm">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm ml-2 w-32 placeholder:text-outline-variant" placeholder="Hledat..." type="text"/>
+</div>
+<div class="flex gap-4">
+<button class="transition-transform duration-200 hover:scale-95">
+<span class="material-symbols-outlined text-primary-container">shopping_cart</span>
+</button>
+<button class="transition-transform duration-200 hover:scale-95">
+<span class="material-symbols-outlined text-primary-container">person</span>
+</button>
+</div>
+</div>
+</div>
+</nav>
+<main class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+<!-- Product Hero Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start mb-24">
+<!-- Product Image -->
+<div class="lg:col-span-7 relative group">
+<div class="aspect-[4/5] overflow-hidden rounded-xl bg-surface-container-low">
+<img alt="Bachova esence Noční klid" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Minimalist amber glass dropper bottle of flower essence on a textured linen surface with soft morning shadows and herbal sprigs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUatRf8sdn9FEgxgQ4SCT97oNsfR7Ps4FXqVLmKpBu6TyPyRz65ZgBnLSKnQaQz_v-w70fu-wwIOvnQpb7e1STAc9gm8xOZCTtWiVgLddQ5MWoCTHgxTh9p7SzNG2nAMql9UZ4iKzMV15nNNXWqev-zqxhds7HbgAeVrzHH2GAwX5i1kNNv5ruE-tHqtsmYdLuWbOndsOTroPXxMlulwpRTgQw4JJce0Hc_kOCJ_0OWlRZiAnTCV5AajuNRiSxIJKol5iCAUPLqV0"/>
+</div>
+<div class="absolute -bottom-6 -right-6 w-32 h-32 bg-secondary-fixed rounded-full flex items-center justify-center p-4 text-center leading-tight shadow-lg transform rotate-12">
+<span class="text-on-secondary-fixed font-headline text-sm italic">Ručně sbírané byliny</span>
+</div>
+</div>
+<!-- Product Info -->
+<div class="lg:col-span-5 flex flex-col pt-4">
+<nav class="flex text-xs uppercase tracking-widest text-outline-variant mb-6 font-label">
+<a class="hover:text-secondary" href="{{DATA:SCREEN:SCREEN_6}}">E-shop</a>
+<span class="mx-2">/</span>
+<a class="hover:text-secondary" href="#">Bachovy esence</a>
+</nav>
+<h1 class="text-4xl lg:text-5xl font-headline text-primary-container mb-4 leading-tight">Bachova esence: Noční klid</h1>
+<p class="text-xl text-secondary italic mb-8">30ml lahvička pro harmonický spánek</p>
+<div class="flex items-center gap-4 mb-8">
+<span class="text-3xl font-body font-medium text-on-surface">540 Kč</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-xs font-label text-on-surface-variant uppercase tracking-tighter">Skladem</span>
+</div>
+<div class="flex flex-col gap-6 p-8 bg-surface-container-low rounded-xl mb-10">
+<div class="flex items-center justify-between">
+<span class="font-label text-sm text-on-surface-variant">Množství</span>
+<div class="flex items-center border border-outline-variant rounded-lg bg-surface">
+<button class="p-2 hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-sm">remove</span></button>
+<span class="px-4 font-body font-bold">1</span>
+<button class="p-2 hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-sm">add</span></button>
+</div>
+</div>
+<button class="w-full bg-primary-container text-on-primary py-4 rounded hover:opacity-90 transition-all font-label font-semibold tracking-wide flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">shopping_cart</span>
+                        Do košíku
+                    </button>
+</div>
+<div class="space-y-4">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary">eco</span>
+<div>
+<p class="font-label font-bold text-sm">100% Přírodní složení</p>
+<p class="text-sm text-on-surface-variant">Bez syntetických konzervantů a barviv.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary">local_shipping</span>
+<div>
+<p class="font-label font-bold text-sm">Doručení do 48 hodin</p>
+<p class="text-sm text-on-surface-variant">Při objednávce do 12:00 expedujeme dnes.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Details & Benefits -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-20 mb-24">
+<section>
+<h2 class="text-3xl font-headline text-primary-container mb-8 border-b-2 border-surface-container-highest pb-4">O produktu</h2>
+<div class="prose prose-slate max-w-none text-on-surface-variant leading-relaxed font-body">
+<p class="mb-6">Bachova esence Noční klid je pečlivě sestavená směs květových výtažků, které pomáhají utišit neklidnou mysl před spaním. Je ideální pro ty, kteří se v noci budí s hlavou plnou myšlenek nebo mají problém s usínáním po náročném dni.</p>
+<h3 class="text-xl font-headline text-on-surface mb-3">Jak vám tato esence pomůže?</h3>
+<ul class="space-y-3 mb-8">
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-secondary text-sm" data-weight="fill">check_circle</span> Harmonizuje emoční stav před odpočinkem.</li>
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-secondary text-sm" data-weight="fill">check_circle</span> Pomáhá uvolnit napětí v těle i mysli.</li>
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-secondary text-sm" data-weight="fill">check_circle</span> Podporuje přirozený cyklus spánku bez vedlejších účinků.</li>
+</ul>
+<h3 class="text-xl font-headline text-on-surface mb-3">Dávkování</h3>
+<p class="mb-4">Aplikujte 4 kapky přímo pod jazyk nebo do sklenice vody 30 minut před spaním. V případě potřeby můžete dávku opakovat při náhlém probuzení během noci.</p>
+</div>
+</section>
+<section class="bg-surface-container-low p-10 rounded-xl">
+<h3 class="text-2xl font-headline text-primary-container mb-6">Složení &amp; Detaily</h3>
+<div class="space-y-6">
+<div>
+<span class="block text-xs uppercase tracking-widest text-outline mb-2">Aktivní složky</span>
+<div class="flex flex-wrap gap-2">
+<span class="bg-secondary-fixed text-on-secondary-fixed px-4 py-1 rounded-full text-xs font-label">Bílý kaštan (White Chestnut)</span>
+<span class="bg-secondary-fixed text-on-secondary-fixed px-4 py-1 rounded-full text-xs font-label">Snědek okoličnatý (Star of Bethlehem)</span>
+<span class="bg-secondary-fixed text-on-secondary-fixed px-4 py-1 rounded-full text-xs font-label">Devaterník (Rock Rose)</span>
+</div>
+</div>
+<div class="h-px bg-outline-variant opacity-20"></div>
+<div>
+<span class="block text-xs uppercase tracking-widest text-outline mb-2">Základ</span>
+<p class="text-on-surface-variant font-body">Kvalitní ovocný destilát (27% obj. alk.) k zachování energie květů, pramenitá voda.</p>
+</div>
+<div class="h-px bg-outline-variant opacity-20"></div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<span class="block text-xs uppercase tracking-widest text-outline mb-1">Objem</span>
+<p class="font-body">30 ml</p>
+</div>
+<div>
+<span class="block text-xs uppercase tracking-widest text-outline mb-1">Trvanlivost</span>
+<p class="font-body">24 měsíců</p>
+</div>
+</div>
+</div>
+<div class="mt-12 p-6 bg-surface border border-outline-variant rounded-lg">
+<h4 class="font-headline text-lg mb-2">Doprava a vrácení</h4>
+<p class="text-sm text-on-surface-variant mb-4">Doprava zdarma u objednávek nad 1 500 Kč. Pokud s produktem nebudete spokojeni, můžete jej do 14 dnů neotevřený vrátit.</p>
+<a class="text-sm font-label text-secondary underline hover:no-underline" href="#">Více o obchodních podmínkách</a>
+</div>
+</section>
+</div>
+<!-- Customer Reviews -->
+<section class="mb-24">
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+<div>
+<h2 class="text-3xl font-headline text-primary-container mb-2">Zkušenosti našich klientů</h2>
+<div class="flex items-center gap-2">
+<div class="flex text-secondary-fixed-dim">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">star_half</span>
+</div>
+<span class="font-label text-sm font-semibold">4.8 z 5 (24 recenzí)</span>
+</div>
+</div>
+<button class="bg-surface-container-high px-6 py-3 rounded text-sm font-label font-bold hover:bg-surface-container-highest transition-colors">Napsat recenzi</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Review 1 -->
+<div class="p-8 bg-surface-container-lowest border border-surface-container-high rounded-xl">
+<div class="flex items-center gap-1 text-secondary mb-4">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="italic text-on-surface-variant font-body mb-6">"Po letech hledání řešení pro mé usínání jsem konečně našla něco, co funguje jemně a bez ranní malátnosti. Úžasný produkt."</p>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed font-bold text-xs">MK</div>
+<div>
+<p class="font-label font-bold text-sm">Marie K.</p>
+<p class="text-xs text-outline">Ověřený zákazník</p>
+</div>
+</div>
+</div>
+<!-- Review 2 -->
+<div class="p-8 bg-surface-container-lowest border border-surface-container-high rounded-xl">
+<div class="flex items-center gap-1 text-secondary mb-4">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="italic text-on-surface-variant font-body mb-6">"Esenci používám i v náročných dnech v práci, když potřebuji zklidnit stres. Chuť je neutrální a účinek nastupuje rychle."</p>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed font-bold text-xs">JP</div>
+<div>
+<p class="font-label font-bold text-sm">Jan P.</p>
+<p class="text-xs text-outline">Ověřený zákazník</p>
+</div>
+</div>
+</div>
+<!-- Review 3 -->
+<div class="p-8 bg-surface-container-lowest border border-surface-container-high rounded-xl">
+<div class="flex items-center gap-1 text-secondary mb-4">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 0;">star</span>
+</div>
+<p class="italic text-on-surface-variant font-body mb-6">"Lahvička vydrží docela dlouho. Oceňuji skleněné balení a rychlé dodání do Zásilkovny."</p>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant font-bold text-xs">LS</div>
+<div>
+<p class="font-label font-bold text-sm">Lenka S.</p>
+<p class="text-xs text-outline">Ověřený zákazník</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Related Products -->
+<section>
+<h2 class="text-3xl font-headline text-primary-container mb-12">Mohlo by vás zajímat</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+<!-- Product 1 -->
+<div class="group cursor-pointer">
+<div class="aspect-square bg-surface-container overflow-hidden rounded-xl mb-4">
+<img alt="Levandulový olej" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Small clear glass bottle with lavender essential oil surrounded by fresh purple lavender flowers on a light background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClntD70LKd6HWF1Cie3r1CJ1_7AXqnpJFLSM1jt7yG7hmJdlzgB0SaLYyQaSA3HI3ItQKMcYTOsBYxVmBToG2zfMO_DzQCDLjG6W7_UV8CGfkJy_MzaWA5_xWjyOC6LP9QGAxt-P_gJvJAitq2veqNQffLybWAoP3UNDjMkrwqv2TUVbVf0wAUbjFg-4GStuNwrhcWL7knyvOLbB-qX7MqCuZmeTtgdlO3koJntFWl3kR36x55o2CtKUm1s5VZulmFFvgP6fbUOSQ"/>
+</div>
+<h3 class="font-headline text-lg mb-1">Levandulové pohlazení</h3>
+<p class="text-sm text-secondary italic mb-2">Esenciální olej 10ml</p>
+<p class="font-body font-bold text-on-surface">320 Kč</p>
+</div>
+<!-- Product 2 -->
+<div class="group cursor-pointer relative">
+<div class="aspect-square bg-surface-container overflow-hidden rounded-xl mb-4">
+<img alt="Krizová esence" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Amber glass spray bottle labeled rescue remedy on a wooden table with soft focus background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_z2K2J0oSLV50AJcKsukqcrfSKNXKxW9u44ULoZ8cfJCsincPHyea00FFB3Lwh8BMkcI2kCbafgxyrvCYSGqoJTPsPjjDiW3r9snoeaHuVXeqE7GHP2SDF2FPFzyWE98Xeu4WeJKNYobYeoRVpsxzRlpE_MHoe617O6NcPtU7kZTb5QcAuvVle8W1x-R9wGohJ3832PrJW0U4iFm3F-cB0K0PLWYXZCdX0XEjeHKkUYX_J6mO4SJzIJJeaaFMy2dIuP5iStTx6OQ"/>
+</div>
+<h3 class="font-headline text-lg mb-1">Krizová esence (Rescue)</h3>
+<p class="text-sm text-secondary italic mb-2">První pomoc při stresu</p>
+<p class="font-body font-bold text-on-surface">480 Kč</p>
+<a aria-label="Zobrazit produkt" class="absolute inset-0 z-10" href="{{DATA:SCREEN:SCREEN_9}}"></a></div>
+<!-- Product 3 -->
+<div class="group cursor-pointer">
+<div class="aspect-square bg-surface-container overflow-hidden rounded-xl mb-4">
+<img alt="Bylinný čaj" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Loose leaf herbal tea blend in a ceramic bowl with dried rose petals and chamomile flowers" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDb1ajn8qDmqLZb7XNUh9plA082cyT0UKl6I4Scu6WPy_U1rev1NAzchq5xLhpeubXV2thUmKR_sm0EciB1zZSJOQiUMtEKfqSnm_UXKFF3zHKLkJtzoAls65jSg7l7-3DoF0J0tSWWbGdb6m9QTFKkX-P3ZiPbFN8kCuVOwgkAAgWM20xje4hzH6aHL0jL6H7dtVJWEgBdvbB-cjmc7cLnCQ7bUgZkyNpUPybFz7G7E_GYWCPt2fv5H89HUQEwc2k6Ja3w6f36ivo"/>
+</div>
+<h3 class="font-headline text-lg mb-1">Večerní rituál</h3>
+<p class="text-sm text-secondary italic mb-2">Sypaný bylinný čaj 50g</p>
+<p class="font-body font-bold text-on-surface">245 Kč</p>
+</div>
+<!-- Product 4 -->
+<div class="group cursor-pointer">
+<div class="aspect-square bg-surface-container overflow-hidden rounded-xl mb-4">
+<img alt="Difuzér" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Modern minimalist ceramic essential oil diffuser with a thin stream of mist in a bright airy room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8CDjFQChCzNZYmN1B3Qr-Oghg9JaXpj9KgBn9ILlYBr7sIAOWtbnp1V2ZBYUBTQzU6uabIloDR-ChnU1P7708vmfTenLrWQXa8mc71pcknRTDzWNC1hTDqXXV80tKLCqlpzHpVQBroh6sVSeIHphdDwC_GbSvVZbuhsRsEy_ABhnfOBuvBPM5jpymsnBgsQ6LEgl7dQHvzoKOPZQ2TlcjsC_P2iJADuE5bv4HQ_MOVkVk5ssjgk1BG-imTdwmeUs1Ij5FDsJwYd8"/>
+</div>
+<h3 class="font-headline text-lg mb-1">Aroma difuzér Zen</h3>
+<p class="text-sm text-secondary italic mb-2">Keramický ultrazvukový</p>
+<p class="font-body font-bold text-on-surface">1 290 Kč</p>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="full-width rounded-t-[1.5rem] mt-20 bg-[#f5f4ef] dark:bg-[#0f1e0c] text-[#1b1c19] dark:text-[#faf9f4]">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 max-w-7xl mx-auto px-8 py-16">
+<div class="col-span-1 md:col-span-1">
+<span class="text-xl font-notoserif text-[#101f0d] dark:text-[#faf9f4] mb-4 block">Zelený Zvon</span>
+<p class="font-plusjakarta text-sm opacity-70 leading-[1.6]">Inspirujeme k nalezení vnitřní rovnováhy skrze sílu přírody a vědomý odpočinek.</p>
+</div>
+<div>
+<h4 class="font-notoserif font-bold text-sm uppercase tracking-widest mb-6">Navigace</h4>
+<ul class="space-y-4 font-plusjakarta text-sm">
+<li><a class="opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors" href="{{DATA:SCREEN:SCREEN_7}}">Studio</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors" href="#">Služby</a></li>
+<li><a class="text-[#765a17] font-medium transition-colors" href="{{DATA:SCREEN:SCREEN_6}}">E-shop</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors" href="{{DATA:SCREEN:SCREEN_5}}">O nás</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-notoserif font-bold text-sm uppercase tracking-widest mb-6">Podpora</h4>
+<ul class="space-y-4 font-plusjakarta text-sm">
+<li><a class="opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors" href="#">Kontakt</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors" href="#">Mapa stránek</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors" href="#">Newsletter</a></li>
+<li><a class="opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors" href="#">Ochrana údajů</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-notoserif font-bold text-sm uppercase tracking-widest mb-6">Sociální sítě</h4>
+<div class="flex gap-4">
+<a class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center hover:bg-[#765a17] hover:text-white transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-lg">public</span>
+</a>
+<a class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center hover:bg-[#765a17] hover:text-white transition-all duration-300" href="#">
+<span class="material-symbols-outlined text-lg">camera</span>
+</a>
+</div>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-8 py-8 border-t border-outline-variant border-opacity-10">
+<p class="text-center font-plusjakarta text-xs opacity-50">© 2024 Zelený Zvon. Vytvořeno pro váš vnitřní klid.</p>
+</div>
+</footer>
+</body></html>
