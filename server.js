@@ -9,10 +9,26 @@ import PDFDocument from 'pdfkit';
 import qrcode from 'qrcode';
 import nodemailer from 'nodemailer';
 import fs from 'fs';
+import multer from 'multer';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const port = process.env.PORT || 3001;
+
+// Upload config (persists on Fly volume, otherwise local /uploads)
+const UPLOADS_DIR = process.env.DATABASE_PATH ? '/data/uploads' : join(__dirname, 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, UPLOADS_DIR),
+  filename: (req, file, cb) => {
+    const ext = file.originalname.split('.').pop();
+    cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}.${ext}`);
+  }
+});
+const upload = multer({ storage });
+app.use('/uploads', express.static(UPLOADS_DIR));
 
 // Allow multiple origins: localhost for local dev and the Vercel app domain for production
 app.use(cors({
@@ -59,11 +75,19 @@ function initDb() {
       code TEXT NOT NULL UNIQUE,
       discount_type TEXT NOT NULL,
       discount_value INTEGER NOT NULL,
+      valid_from DATETIME,
       valid_until DATETIME,
       usage_limit INTEGER,
       times_used INTEGER DEFAULT 0,
       is_active BOOLEAN DEFAULT 1
     )`);
+
+    // Pro starsi instance - automaticky doplnime sloupec valid_from, pokud chybi
+    db.all("PRAGMA table_info(coupons)", (err, columns) => {
+      if (columns && !columns.some(c => c.name === 'valid_from')) {
+        db.run("ALTER TABLE coupons ADD COLUMN valid_from DATETIME");
+      }
+    });
 
     db.run(`CREATE TABLE IF NOT EXISTS orders (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -142,13 +166,25 @@ app.post('/api/auth/google', async (req, res) => {
   }
 });
 
+// File Uploads API
+app.post('/api/upload', authenticateToken, upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'Nahrání obrázku selhalo.' });
+  res.json({ url: `/uploads/${req.file.filename}` });
+});
+
 // Coupons API
 app.get('/api/coupons/validate', (req, res) => {
   const { code } = req.query;
-  db.get('SELECT id, discount_type, discount_value, usage_limit, times_used FROM coupons WHERE code = ? AND is_active = 1', [code], (err, row) => {
+  db.get('SELECT id, discount_type, discount_value, usage_limit, times_used, valid_from, valid_until FROM coupons WHERE code = ? AND is_active = 1', [code], (err, row) => {
     if (err) return res.status(500).json({ error: err.message });
     if (!row) return res.status(404).json({ error: 'Kupón nenalezen nebo vypršel' });
     if (row.usage_limit && row.times_used >= row.usage_limit) return res.status(400).json({ error: 'Kupón byl vyčerpán' });
+    
+    // Check dates bounds
+    const now = new Date();
+    if (row.valid_from && new Date(row.valid_from) > now) return res.status(400).json({ error: 'Platnost tohoto kupónu ještě nezačala' });
+    if (row.valid_until && new Date(row.valid_until) < now) return res.status(400).json({ error: 'Platnost tohoto kupónu již vypršela' });
+
     res.json({ valid: true, discount_type: row.discount_type, discount_value: row.discount_value, id: row.id });
   });
 });
@@ -161,13 +197,16 @@ app.get('/api/coupons', authenticateToken, (req, res) => {
 });
 
 app.post('/api/coupons', authenticateToken, (req, res) => {
-  const { code, discount_type, discount_value, usage_limit } = req.body;
+  const { code, discount_type, discount_value, usage_limit, valid_from, valid_until } = req.body;
   const limitVal = usage_limit ? Number(usage_limit) : null;
-  db.run('INSERT INTO coupons (code, discount_type, discount_value, usage_limit) VALUES (?, ?, ?, ?)',
-    [code, discount_type, discount_value, limitVal],
+  const fromVal = valid_from || null;
+  const untilVal = valid_until || null;
+
+  db.run('INSERT INTO coupons (code, discount_type, discount_value, usage_limit, valid_from, valid_until) VALUES (?, ?, ?, ?, ?, ?)',
+    [code, discount_type, discount_value, limitVal, fromVal, untilVal],
     function(err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID, code, discount_type, discount_value, usage_limit: limitVal, times_used: 0, is_active: 1 });
+      res.json({ id: this.lastID, code, discount_type, discount_value, usage_limit: limitVal, valid_from: fromVal, valid_until: untilVal, times_used: 0, is_active: 1 });
     }
   );
 });
@@ -222,6 +261,18 @@ app.delete('/api/products/:id', authenticateToken, (req, res) => {
 });
 
 // Orders API
+app.get('/api/orders/:id/items', authenticateToken, (req, res) => {
+  db.all(`
+    SELECT oi.id, oi.quantity, p.name, p.price, p.image 
+    FROM order_items oi
+    JOIN products p ON oi.productId = p.id
+    WHERE oi.orderId = ?
+  `, [req.params.id], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
 app.get('/api/orders', authenticateToken, (req, res) => {
   db.all('SELECT * FROM orders ORDER BY createdAt DESC', [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
@@ -308,33 +359,43 @@ async function generateAndSendInvoice(orderId, name, email, amount, items, qrCod
      doc.on('data', buffers.push.bind(buffers));
      doc.on('end', async () => {
          let pdfData = Buffer.concat(buffers);
-         console.log(`[Email Mock] Faktura vygenerována pro ${email}. Připravuji odeslání přes Ethereal SMTP...`);
+         console.log(`Faktura vygenerována pro ${email}. Připravuji odeslání e-mailu...`);
          
          try {
-           // Vytvoříme dočasný testovací účet pro zachytávání emailů (Ethereal)
-           let testAccount = await nodemailer.createTestAccount();
-           
            const transporter = nodemailer.createTransport({ 
-             host: 'smtp.ethereal.email', 
-             port: 587, 
-             secure: false, 
+             host: process.env.SMTP_HOST || 'smtp.ethereal.email', 
+             port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587, 
+             secure: process.env.SMTP_SECURE === 'true', 
              auth: { 
-               user: testAccount.user, 
-               pass: testAccount.pass 
+               user: process.env.SMTP_USER, 
+               pass: process.env.SMTP_PASS
              } 
            });
+
+           // Pokud je hostitel Ethereal (neprovedeno nasazení realnych SMTP), vytvorime testovaci ucet
+           if (transporter.options.host === 'smtp.ethereal.email' && !process.env.SMTP_USER) {
+               console.log("[Test Mode] Používám testovací účet Ethereal protože nejsou zadané SMTP_ proměnné");
+               const testAccount = await nodemailer.createTestAccount();
+               transporter.options.auth = { user: testAccount.user, pass: testAccount.pass };
+           }
            
+           const fromAddress = process.env.SMTP_FROM || '"Zelený Zvon" <info@zelenyzvon.cz>';
+
            let info = await transporter.sendMail({
-             from: '"Zelený Zvon (Test)" <info@zelenyzvon.cz>',
+             from: fromAddress,
              to: email,
              subject: `Objednávka č. ${orderId} - Zelený Zvon`,
              text: `Děkujeme za objednávku! Faktura a QR kód k platbě jsou v příloze.`,
              attachments: [{ filename: `Zalohova_faktura_${orderId}.pdf`, content: pdfData }]
            });
 
-           console.log("Náhled emailu je dostupný na adrese: %s", nodemailer.getTestMessageUrl(info));
+           if (transporter.options.host === 'smtp.ethereal.email') {
+              console.log("Náhled testovacího emailu je dostupný na adrese: %s", nodemailer.getTestMessageUrl(info));
+           } else {
+              console.log("Email úspěšně odeslán na: %s", email);
+           }
          } catch (err) {
-           console.error("Nepodařilo se odeslat testovací e-mail: ", err);
+           console.error("Nepodařilo se odeslat e-mail: ", err);
          }
      });
 

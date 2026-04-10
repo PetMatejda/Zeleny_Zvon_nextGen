@@ -13,6 +13,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Order detail state
+  const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
+
   // Form for products
   const [editingProductId, setEditingProductId] = useState(null);
   const [newProduct, setNewProduct] = useState({
@@ -21,7 +24,7 @@ export default function AdminPage() {
   
   // Form for coupons
   const [newCoupon, setNewCoupon] = useState({
-    code: '', discount_type: 'percent', discount_value: '', usage_limit: ''
+    code: '', discount_type: 'percent', discount_value: '', usage_limit: '', valid_from: '', valid_until: ''
   });
 
   const handleLoginSuccess = async (response) => {
@@ -80,6 +83,34 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchOrderDetails = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/orders/${id}/items`, { headers: { 'Authorization': `Bearer ${token}` }});
+      if (res.ok) setSelectedOrderDetails({ id, items: await res.json() });
+    } catch(e) { console.error(e); }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const res = await fetch(`${API_URL}/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const backendOrigin = API_URL.replace('/api', '');
+        setNewProduct({...newProduct, image: backendOrigin + data.url});
+      } else {
+        alert('Nahrávání selhalo.');
+      }
+    } catch(err) { console.error(err); }
   };
 
   const handleAddProduct = async (e) => {
@@ -143,7 +174,7 @@ export default function AdminPage() {
       });
       if (res.ok) {
         alert('Kupón vytvořen');
-        setNewCoupon({ code: '', discount_type: 'percent', discount_value: '', usage_limit: '' });
+        setNewCoupon({ code: '', discount_type: 'percent', discount_value: '', usage_limit: '', valid_from: '', valid_until: '' });
         fetchData();
       } else {
          alert('Chyba při ukládání kupónu');
@@ -263,13 +294,36 @@ export default function AdminPage() {
                      </select>
                   </td>
                   <td className="p-4">
-                     <button className="text-sm text-[#765a17] hover:underline font-bold">Detail</button>
+                     <button onClick={() => fetchOrderDetails(o.id)} className="text-sm text-[#765a17] hover:underline font-bold">Detail</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
+
+      {selectedOrderDetails && (
+         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+            <div className="bg-surface-container-lowest w-full max-w-lg p-6 rounded-2xl shadow-xl">
+               <div className="flex justify-between items-center mb-6">
+                 <h2 className="text-2xl font-headline italic">Detail Obj. #{selectedOrderDetails.id}</h2>
+                 <button onClick={() => setSelectedOrderDetails(null)} className="text-xl font-bold opacity-50 hover:opacity-100">&times;</button>
+               </div>
+               <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                 {selectedOrderDetails.items.map(item => (
+                   <div key={item.id} className="flex gap-4 items-center bg-surface-container-low p-3 rounded-lg border border-[#765a17]/10">
+                      <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
+                      <div className="flex-1">
+                        <p className="font-bold">{item.name}</p>
+                        <p className="text-sm opacity-70">{item.price} Kč &times; {item.quantity} ks</p>
+                      </div>
+                      <p className="font-bold text-[#765a17]">{item.price * item.quantity} Kč</p>
+                   </div>
+                 ))}
+               </div>
+            </div>
+         </div>
       )}
 
       {!loading && activeTab === 'products' && (
@@ -338,8 +392,11 @@ export default function AdminPage() {
                       <input required type="text" placeholder="např. Aura spreje" value={newProduct.category} onChange={e => setNewProduct({...newProduct, category: e.target.value})} className="w-full p-2 rounded bg-[#faf9f4] border-none" />
                    </div>
                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider opacity-70 mb-1">URL Obrázku</label>
-                      <input type="text" placeholder="https://" value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} className="w-full p-2 rounded bg-[#faf9f4] border-none text-xs" />
+                      <label className="block text-xs font-bold uppercase tracking-wider opacity-70 mb-1">Obrázek (URL nebo nahrát)</label>
+                      <div className="flex gap-2">
+                        <input type="text" placeholder="https://" value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})} className="w-full p-2 rounded bg-[#faf9f4] border-none text-xs" />
+                        <input type="file" accept="image/*" onChange={handleImageUpload} className="w-full text-xs p-1" />
+                      </div>
                    </div>
                    <div>
                       <label className="block text-xs font-bold uppercase tracking-wider opacity-70 mb-1">Popis</label>
@@ -367,6 +424,7 @@ export default function AdminPage() {
                    <tr className="bg-surface-container-low text-sm uppercase tracking-wider opacity-80">
                      <th className="p-4 font-bold">Kód</th>
                      <th className="p-4 font-bold">Hodnota</th>
+                     <th className="p-4 font-bold">Platnost</th>
                      <th className="p-4 font-bold">Využito</th>
                      <th className="p-4 font-bold">Akce</th>
                    </tr>
@@ -376,6 +434,9 @@ export default function AdminPage() {
                      <tr key={c.id} className="border-t border-[#765a17]/10 hover:bg-surface-container-low/50">
                        <td className="p-4 font-bold font-mono">{c.code}</td>
                        <td className="p-4 font-bold">{c.discount_type === 'percent' ? `${c.discount_value} %` : `${c.discount_value} Kč`}</td>
+                       <td className="p-4 text-xs opacity-80">
+                          {c.valid_from ? new Date(c.valid_from).toLocaleDateString() : 'Nyní'} - {c.valid_until ? new Date(c.valid_until).toLocaleDateString() : 'Neomezeně'}
+                       </td>
                        <td className="p-4">{c.times_used} {c.usage_limit ? `/ ${c.usage_limit}` : ''}</td>
                        <td className="p-4">
                           <button onClick={() => handleDeleteCoupon(c.id)} className="text-xs font-bold text-red-600 hover:underline">Smazat</button>
@@ -410,6 +471,16 @@ export default function AdminPage() {
                     <div>
                        <label className="block text-xs font-bold uppercase tracking-wider opacity-70 mb-1">Limit (počet použití)</label>
                        <input type="number" placeholder="Prázdné = neomezeno" value={newCoupon.usage_limit} onChange={e => setNewCoupon({...newCoupon, usage_limit: e.target.value})} className="w-full p-2 rounded bg-[#faf9f4] border-none" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider opacity-70 mb-1">Platnost Od</label>
+                          <input type="datetime-local" value={newCoupon.valid_from} onChange={e => setNewCoupon({...newCoupon, valid_from: e.target.value})} className="w-full p-2 rounded bg-[#faf9f4] border-none" />
+                       </div>
+                       <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider opacity-70 mb-1">Platnost Do</label>
+                          <input type="datetime-local" value={newCoupon.valid_until} onChange={e => setNewCoupon({...newCoupon, valid_until: e.target.value})} className="w-full p-2 rounded bg-[#faf9f4] border-none" />
+                       </div>
                     </div>
                     
                     <button type="submit" className="w-full py-3 bg-[#765a17] text-white font-bold rounded-lg hover:bg-[#5b4300] transition-colors mt-6">
