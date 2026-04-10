@@ -105,7 +105,7 @@ export default function CheckoutPage() {
                   <input required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} type="email" className="w-full p-3 rounded-lg bg-surface-container-low border-none focus:ring-2 focus:ring-[#765a17]" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1 opacity-80">Fakturační adresa / korespondenční údaje</label>
+                  <label className="block text-sm font-semibold mb-1 opacity-80">Dodací (fyzická) adresa / fakturační údaje</label>
                   <textarea required value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="w-full p-3 rounded-lg bg-surface-container-low border-none focus:ring-2 focus:ring-[#765a17] min-h-[100px]"></textarea>
                 </div>
              </div>

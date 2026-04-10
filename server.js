@@ -293,6 +293,17 @@ app.get('/api/orders', authenticateToken, (req, res) => {
   });
 });
 
+app.patch('/api/orders/:id/status', authenticateToken, (req, res) => {
+  const { status } = req.body;
+  if (!status) return res.status(400).json({ error: 'Status is required' });
+  
+  db.run('UPDATE orders SET status = ? WHERE id = ?', [status, req.params.id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    if (this.changes === 0) return res.status(404).json({ error: 'Order not found' });
+    res.json({ success: true, status });
+  });
+});
+
 app.post('/api/orders', (req, res) => {
   const { customerName, email, address, totalAmount, items, couponCode } = req.body;
   
