@@ -336,7 +336,7 @@ app.post('/api/orders', (req, res) => {
           // Generování SPAYD QR kódu
           // IBAN pro účet 1570560063/0800
           const formattedAmount = Number(fAmount).toFixed(2);
-          const spaydStr = `SPD*1.0*ACC:CZ5108000000001570560063*AM:${formattedAmount}*CC:CZK*MSG:Objednavka%20${orderId}%20Zeleny%20Zvon`;
+          const spaydStr = `SPD*1.0*ACC:CZ5108000000001570560063*AM:${formattedAmount}*CC:CZK*X-VS:${orderId}*MSG:Objednavka%20${orderId}%20Zeleny%20Zvon`;
           const qrCodeDataUrl = await qrcode.toDataURL(spaydStr, { margin: 2, scale: 5 });
 
           res.json({ id: orderId, status: 'Nová', totalAmount: fAmount, qrCode: qrCodeDataUrl });
