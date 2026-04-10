@@ -150,7 +150,7 @@ function authenticateToken(req, res, next) {
 app.post('/api/auth/google', async (req, res) => {
   const { credential } = req.body;
   
-  const ALLOWED_ADMINS = ['petmatejda@gmail.com', 'peta.matejickova@gmail.com'];
+  const ALLOWED_ADMINS = ['petmatejda@gmail.com', 'peta.matejickova@gmail.com', 'zelenyzvon@gmail.com'];
 
   try {
     const ticket = await oAuth2Client.verifyIdToken({
