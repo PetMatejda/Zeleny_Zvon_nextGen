@@ -6,6 +6,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 export default function AdminPage() {
   const [token, setToken] = useState(localStorage.getItem('adminToken') || null);
   const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'products', 'coupons'
+  const [orderFilter, setOrderFilter] = useState('Vše'); // Vše, Nové, Zaplacené, Vyřízené
   
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
@@ -226,6 +227,26 @@ export default function AdminPage() {
     );
   }
 
+  const statusPriority = {
+    'Nová': 1,
+    'Zaplaceno': 2,
+    'Odesláno': 3,
+    'Storno': 4
+  };
+
+  const displayedOrders = orders.filter(o => {
+    if (orderFilter === 'Vše') return true;
+    if (orderFilter === 'Nové') return o.status === 'Nová';
+    if (orderFilter === 'Zaplacené') return o.status === 'Zaplaceno';
+    if (orderFilter === 'Vyřízené') return o.status === 'Odesláno' || o.status === 'Storno';
+    return true;
+  }).sort((a, b) => {
+    const pA = statusPriority[a.status] || 99;
+    const pB = statusPriority[b.status] || 99;
+    if (pA !== pB) return pA - pB;
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
   return (
     <main className="max-w-7xl mx-auto px-8 pt-8 pb-24 font-plusjakarta">
       <div className="flex justify-between items-center mb-8">
@@ -257,10 +278,22 @@ export default function AdminPage() {
       {loading && <p className="text-center py-20 opacity-50">Načítám data...</p>}
 
       {!loading && activeTab === 'orders' && (
-        <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm border border-[#765a17]/10">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-surface-container-low text-sm uppercase tracking-wider opacity-80">
+        <>
+          <div className="flex gap-2 mb-4">
+             {['Vše', 'Nové', 'Zaplacené', 'Vyřízené'].map(f => (
+                <button
+                   key={f}
+                   onClick={() => setOrderFilter(f)}
+                   className={`px-4 py-1 rounded-full text-sm font-bold transition-colors ${orderFilter === f ? 'bg-[#765a17] text-white' : 'bg-surface-container-high text-on-surface hover:bg-surface-variant'}`}
+                >
+                   {f}
+                </button>
+             ))}
+          </div>
+          <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm border border-[#765a17]/10">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-surface-container-low text-sm uppercase tracking-wider opacity-80">
                 <th className="p-4 font-bold">ID</th>
                 <th className="p-4 font-bold">Zákazník</th>
                 <th className="p-4 font-bold">E-mail</th>
@@ -271,10 +304,10 @@ export default function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {orders.length === 0 && (
+              {displayedOrders.length === 0 && (
                 <tr><td colSpan="7" className="p-8 text-center opacity-50">Zatím nejsou žádné objednávky.</td></tr>
               )}
-              {orders.map(o => (
+              {displayedOrders.map(o => (
                 <tr key={o.id} className="border-t border-[#765a17]/10 hover:bg-surface-container-low/50 transition-colors">
                   <td className="p-4 font-mono font-bold">#{o.id}</td>
                   <td className="p-4">{o.customerName}</td>
@@ -301,6 +334,7 @@ export default function AdminPage() {
             </tbody>
           </table>
         </div>
+        </>
       )}
 
       {selectedOrderDetails && (

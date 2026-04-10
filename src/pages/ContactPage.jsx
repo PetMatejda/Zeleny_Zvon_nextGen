@@ -1,6 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [status, setStatus] = useState({ type: '', message: '' });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus({ type: 'loading', message: 'Odesílám...' });
+    try {
+      const res = await fetch(`${API_URL}/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setStatus({ type: 'success', message: 'Zpráva byla úspěšně odeslána. Brzy se Vám ozveme.' });
+        setFormData({ name: '', email: '', message: '' });
+      } else {
+        setStatus({ type: 'error', message: data.error || 'Něco se pokazilo.' });
+      }
+    } catch (err) {
+      setStatus({ type: 'error', message: 'Chyba serveru. Zkuste to prosím později.' });
+    }
+  };
+
   return (
     <main className="font-plusjakarta pt-20">
       {/* Hero Section */}
@@ -69,11 +95,19 @@ export default function ContactPage() {
             <div>
               <div className="bg-surface p-12 rounded-xl shadow-[0_20px_40px_rgba(15,30,12,0.03)] border border-surface-variant/50">
                 <h3 className="text-3xl font-notoserif text-primary-container mb-8">Napište mi</h3>
-                <form className="flex flex-col gap-6 font-plusjakarta">
+                <form onSubmit={handleSubmit} className="flex flex-col gap-6 font-plusjakarta">
+                  {status.message && (
+                    <div className={`p-4 rounded-lg font-bold text-sm ${status.type === 'success' ? 'bg-[#765a17]/10 text-[#765a17]' : status.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-gray-100'}`}>
+                      {status.message}
+                    </div>
+                  )}
                   <div>
                     <label className="block mb-2 text-on-surface-variant font-medium">Jméno</label>
                     <input 
                       type="text" 
+                      required
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
                       className="w-full px-4 py-3 rounded-lg bg-surface-container border border-outline-variant focus:ring-2 focus:ring-[#765a17] focus:border-transparent transition-all outline-none" 
                     />
                   </div>
@@ -81,6 +115,9 @@ export default function ContactPage() {
                     <label className="block mb-2 text-on-surface-variant font-medium">E-mail</label>
                     <input 
                       type="email" 
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
                       className="w-full px-4 py-3 rounded-lg bg-surface-container border border-outline-variant focus:ring-2 focus:ring-[#765a17] focus:border-transparent transition-all outline-none" 
                     />
                   </div>
@@ -88,14 +125,18 @@ export default function ContactPage() {
                     <label className="block mb-2 text-on-surface-variant font-medium">Zpráva</label>
                     <textarea 
                       rows="5" 
+                      required
+                      value={formData.message}
+                      onChange={(e) => setFormData({...formData, message: e.target.value})}
                       className="w-full px-4 py-3 rounded-lg bg-surface-container border border-outline-variant focus:ring-2 focus:ring-[#765a17] focus:border-transparent transition-all outline-none resize-none"
                     ></textarea>
                   </div>
                   <button 
-                    type="button" 
-                    className="mt-4 bg-primary-container text-on-primary px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl hover:-translate-y-1 transition-all"
+                    type="submit" 
+                    disabled={status.type === 'loading'}
+                    className="mt-4 bg-primary-container text-on-primary px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl hover:-translate-y-1 transition-all disabled:opacity-50 disabled:hover:translate-y-0"
                   >
-                    Odeslat zprávu
+                    {status.type === 'loading' ? 'Odesílám...' : 'Odeslat zprávu'}
                   </button>
                 </form>
               </div>

@@ -18,9 +18,9 @@ export default function HomePage() {
         <div className="container max-w-7xl mx-auto px-8 relative z-10">
           <div className="max-w-2xl">
             <span className="text-secondary-fixed font-label tracking-[0.3em] uppercase text-xs font-bold mb-6 block hero-text-shadow">Domácí holistické studio & E-shop</span>
-            <h1 className="font-headline text-5xl md:text-7xl text-white mb-8 leading-[1.1] hero-text-shadow tracking-tight">Najděte svůj vnitřní klid a harmonii.</h1>
+            <h1 className="font-headline text-5xl md:text-7xl text-white mb-8 leading-[1.1] hero-text-shadow tracking-tight">Cesta ke spokojenému životu.</h1>
             <p className="text-white/90 mb-12 text-xl md:text-2xl font-light leading-relaxed max-w-xl hero-text-shadow italic">
-                Holistický přístup k tělu i duši. Spojujeme terapeutické služby s čistou přírodní silou našeho e-shopu.
+                Nabízím podporu a péči na Vaší cestě ke spokojenému a vědomému životu. Pomoc s překonáním náročných životních zkušeností.
             </p>
             <div className="flex flex-wrap gap-6">
               <Link to="/services" className="bg-primary-container text-on-primary px-10 py-4 rounded-lg font-semibold tracking-wide transition-all hover:shadow-2xl hover:brightness-110 active:scale-95 inline-block">
@@ -42,20 +42,21 @@ export default function HomePage() {
               <div className="aspect-[4/5] rounded-xl overflow-hidden shadow-xl">
                 <img 
                   className="w-full h-full object-cover" 
-                  alt="portrait of a serene middle aged woman" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJyEWsHDZpxITkrUkX8s8AaUPu4eRbgaWxJTCbW-kNr6VnojG3g1U2hmiOgUrogH4KvDiJRX-vPVIH91qWGuScYOJOeHxxXYEfn0pRKax0jl4nv4Rk1YHg6ZomJoYzT2QkYnZ_s872L6YS_JytL9UCRwvqxjgLF49E_g_fIN7knUTU7oDNdh0bsG8lX2WHi5m6eP08Wpbp5uockPOCVnGLvn1nn3wYhOG23EbPAjTzzinuCQwdWyssUwf_5TPlhY3E9iIBNWYCQSk"
+                  alt="Petra Matějíčková" 
+                  src="https://be43f77103.clvaw-cdnwnd.com/7e020fcf408e821cb2e88418c25b9f42/200004532-b1326b132a/9X6A9899%20kopie%202-001px.jpeg?ph=be43f77103"
                 />
               </div>
               <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-secondary-container rounded-full flex items-center justify-center p-6 text-center animate-pulse">
-                <p className="font-headline italic text-on-secondary-container text-sm">"Vaše cesta k rezonanci začíná zde."</p>
+                <p className="font-headline italic text-on-secondary-container text-sm">"Moje 3R:<br/>RESPEKT, RADOST, REZONANCE."</p>
               </div>
             </div>
             <div>
-              <span className="text-secondary font-label tracking-widest uppercase text-xs font-bold mb-4 block">O nás</span>
-              <h2 className="font-headline text-4xl text-on-surface mb-8">Vítejte v Zeleném Zvonu</h2>
+              <span className="text-secondary font-label tracking-widest uppercase text-xs font-bold mb-4 block">Vítejte</span>
+              <h2 className="font-headline text-4xl text-on-surface mb-8">Zelený Zvon</h2>
               <div className="space-y-6 text-on-surface-variant leading-relaxed">
-                <p>Jmenuji se Petra Matějíčková a mým posláním je pomáhat lidem nacházet rovnováhu v dnešním uspěchaném světě. Zelený Zvon vznikl jako bezpečný přístav, kde se můžete zastavit, nadechnout a znovu se spojit sami se sebou.</p>
-                <p>V našem studiu nekoukáme jen na symptomy, ale na člověka jako celek. Každá terapie je individuální cesta, kterou procházíme společně.</p>
+                <p>Využívám citlivé a zároveň efektivní metody práce s myslí a tělem, které spojují tradiční znalosti a aktuální poznatky vědy.</p>
+                <p>Pomohu Vám propojit hlavu s prožíváním těla, objevit jejich vzájemný vztah a komunikaci na cestě ke zdraví. S všímavostí a laskavostí. Přináším inspiraci, celostní přístup i hlubokou osobní zkušenost.</p>
+                <p>Mám úctu k moudrosti Vašeho těla a respektuji Vaše hranice. Naslouchám hlasu Vašeho srdce a duše...</p>
               </div>
               <div className="mt-10">
                 <p className="font-headline italic text-xl text-primary-container">Petra Matějíčková</p>

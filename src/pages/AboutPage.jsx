@@ -28,31 +28,46 @@ export default function AboutPage() {
       {/* Our Story / Náš příběh */}
       <section className="py-32 bg-surface">
         <div className="max-w-7xl mx-auto px-8">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-16 items-center">
-            <div className="md:col-span-5 relative">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-16 items-start">
+            <div className="md:col-span-5 relative sticky top-32">
               <div className="aspect-[4/5] rounded-xl overflow-hidden shadow-[0_20px_40px_rgba(15,30,12,0.06)]">
                 <img 
                   className="w-full h-full object-cover" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4Lc5oUAwq_QbX1gXEhRGvOplfVJUc5rRTK1tqoRpY0lnl7S83ofjVBBd-GuKIzvIITAyAivXchqQoio24hdGRo8Hcyl47xKdN_4_ZWn8MM3vxqHqmcm5oWEyycMQkOVPsu3egimkUsTBlxumElXbekmCxkgRtXGEa5PWB1EFNIr8OhNxnpjFOZaqK5D5HZxDIZ2_9MfvEAfQwuvc07Hfkxa0hOdPbjn8chwJPeqi2Tl3nHItvYaUaKFzs7pJdD4ySdj9x5C65Tks"
-                  alt="portrait of a serene woman"
+                  src="https://be43f77103.clvaw-cdnwnd.com/7e020fcf408e821cb2e88418c25b9f42/200004532-b1326b132a/9X6A9899%20kopie%202-001px.jpeg?ph=be43f77103"
+                  alt="Petra Matějíčková"
                 />
               </div>
               <div className="absolute -bottom-8 -right-8 w-48 h-48 bg-secondary-container rounded-xl -z-10 opacity-30"></div>
             </div>
             <div className="md:col-span-7">
-              <h2 className="text-4xl font-notoserif text-primary-container mb-8">Náš příběh</h2>
+              <h2 className="text-4xl font-notoserif text-primary-container mb-8">Můj příběh</h2>
               <div className="space-y-6 text-lg leading-relaxed text-on-surface-variant font-plusjakarta">
                 <p className="italic text-primary-container font-medium text-xl border-l-4 border-secondary pl-6 mb-8">
-                    "Zelený Zvon vznikl z ticha. Z potřeby najít místo, které by rezonovalo s přírodou i naší duší ve světě, který je příliš hlasitý."
+                    "Jsem obyčejná žena s nevšedními životními zkušenostmi. Nešetřila jsem se a život nešetřil mě. Poznala jsem úspěchy i pády. Měla jsem možnost projít mnoho světů."
                 </p>
                 <p>
-                    Jmenuji se Klára a mou vizí bylo vytvořit útočiště, kde se moderní terapie potkává s tisíciletou moudrostí. Věřím, že každý z nás nese svůj vlastní 'zvon' – vnitřní harmonii, která se občas vychýlí z rytmu.
+                    Umělecký, akademický i krajinu sebepoznání. Překonala jsem hluboké trauma, poruchu příjmu potravy, vážné onemocnění i několik fatálních osobních a podnikatelských nezdarů. Měla jsem odvahu podívat se až na dno propasti, abych uviděla a pochopila své životní vzorce. A měla dostatek trpělivosti a sil, je uvolnit a změnit. Zpomalila jsem své životní tempo. V mnoha ohledech jsem měla neuvěřitelné štěstí. Život jde dál a já jdu konečně s ním. S plnou zodpovědností za sebe, své zdraví a s vědomím, že tělo a duše přirozeně touží po harmonii.
                 </p>
                 <p>
-                    Moje cesta začala studiem bylinek v podhůří a pokračovala přes certifikace v holistických terapiích až k otevření tohoto prostoru. Zelený Zvon je vyjádřením mé lásky k zemi a k lidskému potenciálu uzdravit se skrze klid.
+                    Ač jsem na gymnáziu zvažovala studium medicíny, na krásných 12 let jsem skončila na prknech, co znamenají svět. Byla jsem členkou různých muzikálových souborů a věnovala se múzickým uměním (Jesus Christ Superstar, HAIR, Drákula, Hrabě Monte Cristo, Les Miserábles, Miss Saigon). Roky jsem vstupovala do různých rolí, hrála a hrála si. S charaktery postav, s jejich hranicemi a sama se sebou. Souběžně s uměleckou dráhou jsem se od svých 18 let věnovala i pedagogické práci s dětmi v tanečním studiu DAG.
+                </p>
+                <p>
+                    S tehdejším partnerem jsem založila a vedla kultovní pražskou kavárnu Dobrá Trafika. Po osobní krizi následoval úprk z města. Několik měsíců jsem prožila na chalupě v brdských lesích a pracovala v květinářství, kde jsem se naučila vázat květiny i pohřební věnce.
+                </p>
+                <p>
+                    Uměleckou kariéru vystřídala role mateřská. V pokročilém stádiu těhotenství jsem si v roce 2004 splnila sen a byla jsem přijata na FF UK, obor Etnologie. Vedle mateřství jsem se věnovala kulturně-sociální antropologii... K certifikaci v metodě Pilates a učitelství Kundalini jógy jsem přidala i rekvalifikaci kuchaře a obhájila projekt holistického centra. Pokračovala jsem v cestách za poznáním psychoterapeutických přístupů, výživy a bylin.
+                </p>
+                <p>
+                    Následoval dlouhý půst, obřad s amazonskou medicínou, týdenní pobyt ve tmě. Objevila jsem sílu dechu a schopnost sebeuzdravení. Přišel Covid a s ním spousta deziluzí a nečekaných ztrát. Pod tlakem událostí se rozpadla další nepotřebná přesvědčení, aby udělala místo pro nové. Zdravější, radostnější, pravdivější, svobodnější.
+                </p>
+                <p>
+                    Zhmotnila jsem svůj sen a místo holistického centra jsem otevřela domácí holistické studio. Děkuji svým blízkým za podporu. Důvěrný vztah se sebou a s nimi je to nejcennější, co mám.
+                </p>
+                <p>
+                    Ve své praxi naplno využívám svou plnou přítomnost, vnitřní klid, nabyté zkušenosti a poznání. Kombinuji různé techniky a přístupy směřující k jednotě těla, mysli a duše. Vytvářím prostor pro sebepéči, seberegulaci, sebeuzdravení. Nabízím rozmanité způsoby, jak objevit cestu ke zdraví, spokojenosti a rovnováze. Beze spěchu, bez tlaku, bez přílišného očekávání. S všímavostí, důvěrou, respektem, radostí a rezonancí. :-)
                 </p>
                 <div className="pt-8">
-                  <span className="font-notoserif italic text-2xl text-[#765a17] dark:text-[#ffdf9f]">Klára Novotná</span>
+                  <span className="font-notoserif italic text-2xl text-[#765a17] dark:text-[#ffdf9f]">Petra Matějíčková</span>
                   <p className="text-sm font-plusjakarta text-on-surface-variant opacity-60">Zakladatelka & Terapeutka</p>
                 </div>
               </div>
@@ -95,7 +110,7 @@ export default function AboutPage() {
             </div>
             <h3 className="text-2xl font-notoserif mb-4 text-on-surface">Inovace</h3>
             <p className="text-on-surface-variant leading-relaxed">
-                Propojujeme tradiční techniky s novými poznatky o neurovědě a zvukovém léčení pro dosažení nejlepších výsledků.
+                Propojujeme tradiční techniky s poznatky o neurovědě a zvukovém léčení pro dosažení nejlepších výsledků.
             </p>
           </div>
         </div>
@@ -165,7 +180,7 @@ export default function AboutPage() {
           <div className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between">
             <div>
               <h2 className="text-4xl font-notoserif mb-4 text-[#faf9f4]">Náš tým</h2>
-              <p className="text-on-primary-container max-w-lg">Průvodci na vaší cestě k harmonii. Každý z nás přináší unikátní pohled a specializaci.</p>
+              <p className="text-on-primary-container max-w-lg">Rodinné studio. Každý z nás přináší unikátní pohled a společně se staráme o harmonický chod Zeleného Zvonu.</p>
             </div>
             <div className="mt-8 md:mt-0">
               <button className="bg-secondary-fixed text-on-secondary-fixed px-8 py-4 rounded-full font-semibold hover:bg-secondary-fixed-dim transition-colors">Přidejte se k nám</button>
@@ -174,45 +189,45 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {/* Team Member 1 */}
             <div className="group">
-              <div className="relative mb-6 overflow-hidden rounded-xl aspect-square">
+              <div className="relative mb-6 overflow-hidden rounded-xl aspect-[3/4]">
                 <img 
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLsa2vhr6WytHlsqYaU4yOv6sgSYYZQQei9o70MyE3H0DuIMJ_76nRpt9K3vsS7y22-dpewAtjD7i-I0thWkcF2Y6c96Rfyv7KVTRP6cAdetbBL5_O9oo7ZWSld58QqgpsBRHAe9uPQXXt1-Ds6_RaWX5Vk5C2OLE2EonLrQopT3BkglPs56y7GDn5_vVIzTVGZQl0UYuAoAy1WCoYyJslw8UtZbi3PrMYFsYz6H4ipLvxiwtEWDZEIjOjHrajPnGhuWno-jfsJMM"
-                  alt="Klára Novotná"
+                  src="https://be43f77103.clvaw-cdnwnd.com/7e020fcf408e821cb2e88418c25b9f42/200004532-b1326b132a/9X6A9899%20kopie%202-001px.jpeg?ph=be43f77103"
+                  alt="Petra Matějíčková"
                 />
                 <div className="absolute inset-0 bg-[#765a17]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
-              <h3 className="text-2xl font-notoserif mb-1 text-[#faf9f4]">Klára Novotná</h3>
-              <p className="text-on-primary-container font-plusjakarta uppercase tracking-widest text-xs mb-4">Founder & Sound Healer</p>
-              <p className="text-sm opacity-80 leading-relaxed text-[#faf9f4]">Expertka na vibrační medicínu a fytoterapii s 15letou praxí v oboru holistického zdraví.</p>
+              <h3 className="text-2xl font-notoserif mb-1 text-[#faf9f4]">Petra Matějíčková</h3>
+              <p className="text-on-primary-container font-plusjakarta uppercase tracking-widest text-xs mb-4">Zakladatelka & Terapeutka</p>
+              <p className="text-sm opacity-80 leading-relaxed text-[#faf9f4]">Odbornice s letitými zkušenostmi a srdce celého studia. Každému klientovi věnuje plnou a laskavou pozornost na jeho cestě k seberegulaci.</p>
             </div>
             {/* Team Member 2 */}
             <div className="group">
-              <div className="relative mb-6 overflow-hidden rounded-xl aspect-square">
+              <div className="relative mb-6 overflow-hidden rounded-xl aspect-[3/4]">
                 <img 
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-NrF7_KzigsUuYg6rDSNvRsHB4fiiXxsFiCJWjkqwBoANWJ6t30Kb9zAgNzriiQLDp9Y9OgwwccxQTT-i9v1hj5vVW8yPt0CX7XTRWjkFiHdjFpmvTi2dDH8xS8uI4GB42j7NPPAommVvdBPuuRg6GlFvO9wErCPVq3KV7I1RBd6GuPG3N6gRlAOwhwsHwDYJpEMTb1lRRhaeM3KB3iCtL4kFeoLz1YHrzJH-HOeviK46wKfRBDP5Q86zwgjodhhMXpfQ_Gvt-4M"
-                  alt="Tomáš Bareš"
+                  alt="Petr Matějíček"
                 />
                 <div className="absolute inset-0 bg-[#765a17]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
-              <h3 className="text-2xl font-notoserif mb-1 text-[#faf9f4]">Tomáš Bareš</h3>
-              <p className="text-on-primary-container font-plusjakarta uppercase tracking-widest text-xs mb-4">Breathwork Coach</p>
-              <p className="text-sm opacity-80 leading-relaxed text-[#faf9f4]">Specialista na dechové techniky a mindfulness, který vám pomůže ovládnout stres v každodenním životě.</p>
+              <h3 className="text-2xl font-notoserif mb-1 text-[#faf9f4]">Petr Matějíček</h3>
+              <p className="text-on-primary-container font-plusjakarta uppercase tracking-widest text-xs mb-4">Operations & IT</p>
+              <p className="text-sm opacity-80 leading-relaxed text-[#faf9f4]">Stojí za hladkým chodem všeho, co není na první pohled vidět. Pečuje o infrastrukturu, e-shop a komunikaci s vnějším světem.</p>
             </div>
             {/* Team Member 3 */}
             <div className="group">
-              <div className="relative mb-6 overflow-hidden rounded-xl aspect-square">
+              <div className="relative mb-6 overflow-hidden rounded-xl aspect-[3/4]">
                 <img 
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6I40sDxqnAkoaRYTs7_XYc_GWPxXJXUNSm_wWPZNs1bDwjuPgYT-EHo_0UrK47zF_QViA57kbKFuCC8U0vgyzBz5cUyzguhB0-dDZvMQRHqcFjtEciMfcvC0_-rW9RE493no9ReDlcdHQOXD6P4HpKhVP16QkhA9xwZo6r8EdKrAg5HrHk4dW_Z1m5NG2BewSTof8skUCFzXcX8yytnsE35n2PFIHui52rPQARGdbYvRbub1uMQCEBmyxSQg5U6eCyB8lJgiFpNU"
-                  alt="Eliška Malá"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7e3X6H_RXYAONX1s6k6P6jFqV_1c7w1n6n6xG_gI_J2J-u1X7G0sK6H-S3x4XN4K0Hw1eW9F8388G4T4tJ_Yn5tH_1b4O2Q6hBf3h8k5LwT2W1I-_P2i8O7gK2O6h3J1o5A9N5X_E3r1F0Z_Y465E3kX5H4N9w6J5h1l-H6vH8w2j8w_9OQwM2X0W9a4x2jX-J_3e"
+                  alt="Šimon Matějíček"
                 />
                 <div className="absolute inset-0 bg-[#765a17]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
-              <h3 className="text-2xl font-notoserif mb-1 text-[#faf9f4]">Eliška Malá</h3>
-              <p className="text-on-primary-container font-plusjakarta uppercase tracking-widest text-xs mb-4">Movement Specialist</p>
-              <p className="text-sm opacity-80 leading-relaxed text-[#faf9f4]">Její lekce jógy a somatického pohybu jsou navrženy tak, aby obnovily plynulost a lehkost vašeho těla.</p>
+              <h3 className="text-2xl font-notoserif mb-1 text-[#faf9f4]">Šimon Matějíček</h3>
+              <p className="text-on-primary-container font-plusjakarta uppercase tracking-widest text-xs mb-4">Logistika & Marketing</p>
+              <p className="text-sm opacity-80 leading-relaxed text-[#faf9f4]">Zajišťuje bezpečné doručení e-shopových objednávek a pomáhá šířit povědomí o Zeleném Zvonu do světa.</p>
             </div>
           </div>
         </div>
