@@ -150,7 +150,7 @@ function authenticateToken(req, res, next) {
 app.post('/api/auth/google', async (req, res) => {
   const { credential } = req.body;
   
-  const ALLOWED_ADMINS = ['petmatejda@gmail.com', 'peta.matejickova@gmail.com', 'zelenyzvon@gmail.com'];
+  const ALLOWED_ADMINS = ['petmatejda@gmail.com', 'peta.matejickova@gmail.com'];
 
   try {
     const ticket = await oAuth2Client.verifyIdToken({
@@ -385,7 +385,7 @@ async function generateAndSendInvoice(orderId, name, email, amount, items, qrCod
                transporter.options.auth = { user: testAccount.user, pass: testAccount.pass };
            }
            
-           const fromAddress = process.env.SMTP_FROM || '"Zelený Zvon" <info@zelenyzvon.cz>';
+           const fromAddress = process.env.SMTP_FROM || '"Zelený Zvon" <zelenyzvon@gmail.com>';
 
            let info = await transporter.sendMail({
              from: fromAddress,
