@@ -146,6 +146,32 @@ app.get('/api/coupons/validate', (req, res) => {
   });
 });
 
+app.get('/api/coupons', authenticateToken, (req, res) => {
+  db.all('SELECT * FROM coupons ORDER BY id DESC', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+app.post('/api/coupons', authenticateToken, (req, res) => {
+  const { code, discount_type, discount_value, usage_limit } = req.body;
+  const limitVal = usage_limit ? Number(usage_limit) : null;
+  db.run('INSERT INTO coupons (code, discount_type, discount_value, usage_limit) VALUES (?, ?, ?, ?)',
+    [code, discount_type, discount_value, limitVal],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id: this.lastID, code, discount_type, discount_value, usage_limit: limitVal, times_used: 0, is_active: 1 });
+    }
+  );
+});
+
+app.delete('/api/coupons/:id', authenticateToken, (req, res) => {
+  db.run('DELETE FROM coupons WHERE id = ?', [req.params.id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
 // Products API
 app.get('/api/products', (req, res) => {
   db.all('SELECT * FROM products', [], (err, rows) => {
@@ -166,6 +192,26 @@ app.post('/api/products', authenticateToken, (req, res) => {
       res.json({ id: this.lastID, name, price, category, description, image, stock: stockVal, is_hero: isHeroVal });
     }
   );
+});
+
+app.put('/api/products/:id', authenticateToken, (req, res) => {
+  const { name, price, category, description, image, stock, is_hero } = req.body;
+  const isHeroVal = is_hero ? 1 : 0;
+  const stockVal = stock || 0;
+  db.run('UPDATE products SET name = ?, price = ?, category = ?, description = ?, image = ?, stock = ?, is_hero = ? WHERE id = ?',
+    [name, price, category, description, image, stockVal, isHeroVal, req.params.id],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true });
+    }
+  );
+});
+
+app.delete('/api/products/:id', authenticateToken, (req, res) => {
+  db.run('DELETE FROM products WHERE id = ?', [req.params.id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
 });
 
 // Orders API
