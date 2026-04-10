@@ -93,12 +93,19 @@ function initDb() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       customerName TEXT NOT NULL,
       email TEXT NOT NULL,
+      address TEXT,
       totalAmount INTEGER NOT NULL,
       status TEXT DEFAULT 'Nová',
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       coupon_id INTEGER,
       FOREIGN KEY(coupon_id) REFERENCES coupons(id)
     )`);
+
+    db.all("PRAGMA table_info(orders)", (err, columns) => {
+      if (columns && !columns.some(c => c.name === 'address')) {
+        db.run("ALTER TABLE orders ADD COLUMN address TEXT");
+      }
+    });
 
     db.run(`CREATE TABLE IF NOT EXISTS order_items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -287,7 +294,7 @@ app.get('/api/orders', authenticateToken, (req, res) => {
 });
 
 app.post('/api/orders', (req, res) => {
-  const { customerName, email, totalAmount, items, couponCode } = req.body;
+  const { customerName, email, address, totalAmount, items, couponCode } = req.body;
   
   let finalAmount = totalAmount;
   
@@ -295,8 +302,8 @@ app.post('/api/orders', (req, res) => {
     db.run('BEGIN TRANSACTION');
 
     const finalizeOrder = (cId, fAmount) => {
-      db.run('INSERT INTO orders (customerName, email, totalAmount, coupon_id) VALUES (?, ?, ?, ?)',
-        [customerName, email, fAmount, cId],
+      db.run('INSERT INTO orders (customerName, email, address, totalAmount, coupon_id) VALUES (?, ?, ?, ?, ?)',
+        [customerName, email, address || '', fAmount, cId],
         async function(err) {
           if (err) {
             db.run('ROLLBACK');
@@ -324,7 +331,7 @@ app.post('/api/orders', (req, res) => {
           res.json({ id: orderId, status: 'Nová', totalAmount: fAmount, qrCode: qrCodeDataUrl });
 
           // Async Invoice & Email generation
-          setTimeout(() => generateAndSendInvoice(orderId, customerName, email, fAmount, items, qrCodeDataUrl), 50);
+          setTimeout(() => generateAndSendInvoice(orderId, customerName, email, address, fAmount, items, qrCodeDataUrl), 50);
         }
       );
     };
@@ -358,9 +365,27 @@ app.patch('/api/orders/:id/status', authenticateToken, (req, res) => {
 });
 
 // PDF & Email Logic
-async function generateAndSendInvoice(orderId, name, email, amount, items, qrCodeDataUrl) {
+async function generateAndSendInvoice(orderId, name, email, address, amount, items, qrCodeDataUrl) {
   try {
+     const itemDetails = await new Promise((resolve, reject) => {
+        const productIds = items.map(i => i.productId).join(',');
+        if (!productIds) return resolve([]);
+        db.all(`SELECT id, name, price FROM products WHERE id IN (${productIds})`, (err, rows) => {
+           if (err) reject(err);
+           else {
+               const enrichedItems = items.map(item => {
+                  const product = rows.find(r => r.id === item.productId);
+                  return { ...item, name: product ? product.name : 'Neznámý produkt', price: product ? product.price : 0 };
+               });
+               resolve(enrichedItems);
+           }
+        });
+     });
+
      const doc = new PDFDocument({ margin: 50 });
+     doc.registerFont('Roboto', './fonts/Roboto-Regular.ttf');
+     doc.registerFont('Roboto-Bold', './fonts/Roboto-Bold.ttf');
+     
      let buffers = [];
      doc.on('data', buffers.push.bind(buffers));
      doc.on('end', async () => {
@@ -378,21 +403,56 @@ async function generateAndSendInvoice(orderId, name, email, amount, items, qrCod
              } 
            });
 
-           // Pokud je hostitel Ethereal (neprovedeno nasazení realnych SMTP), vytvorime testovaci ucet
            if (transporter.options.host === 'smtp.ethereal.email' && !process.env.SMTP_USER) {
-               console.log("[Test Mode] Používám testovací účet Ethereal protože nejsou zadané SMTP_ proměnné");
                const testAccount = await nodemailer.createTestAccount();
                transporter.options.auth = { user: testAccount.user, pass: testAccount.pass };
            }
            
            const fromAddress = process.env.SMTP_FROM || '"Zelený Zvon" <zelenyzvon@gmail.com>';
 
+           const qrBase64 = qrCodeDataUrl.replace(/^data:image\/png;base64,/, "");
+           const qrBufferEmail = Buffer.from(qrBase64, 'base64');
+
+           const htmlTemplate = `
+             <div style="font-family: Arial, sans-serif; color: #1b1c19; max-width: 600px; margin: 0 auto; border: 1px solid #765a17; border-radius: 10px; overflow: hidden;">
+                <div style="background-color: #765a17; color: #fff; padding: 20px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 24px; font-style: italic;">Zelený Zvon</h1>
+                </div>
+                <div style="padding: 30px;">
+                    <h2 style="margin-top: 0; color: #1b1c19;">Děkujeme za vaši objednávku!</h2>
+                    <p>Vážený/á zákazníku,</p>
+                    <p>vaše objednávka číslo <strong>${orderId}</strong> byla úspěšně zpracována. V příloze tohoto e-mailu najdete zálohovou fakturu k proplacení ve formátu PDF.</p>
+                    <br/>
+                    <div style="background-color: #f6f5f1; border-radius: 8px; padding: 20px;">
+                      <h3 style="color: #765a17; border-bottom: 2px solid #765a17; padding-bottom: 8px; margin-top: 0;">Výzva k úhradě</h3>
+                      <p>Prosíme o laskavou úhradu částky: <strong style="font-size: 18px;">${amount} Kč</strong></p>
+                      <ul style="list-style-type: none; padding-left: 0; line-height: 1.8;">
+                        <li>Číslo účtu: <strong>1570560063/0800</strong></li>
+                        <li>Variabilní symbol: <strong>${orderId}</strong></li>
+                      </ul>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Pro rychlou a snadnou platbu přes mobilní bankovnictví naskenujte tento QR kód:</p>
+                        <img src="cid:qrcode_image" alt="QR Platba" style="width: 200px; height: 200px; display: inline-block; border: 2px solid #765a17; border-radius: 10px; padding: 10px;" />
+                    </div>
+                </div>
+                <div style="background-color: #f6f5f1; padding: 15px; text-align: center; font-size: 12px; color: #888;">
+                    Zelený Zvon | Zpět k přírodě<br/>
+                    Pokud máte jakékoliv dotazy, jednoduše odpovězte na tento e-mail.
+                </div>
+             </div>
+           `;
+
            let info = await transporter.sendMail({
              from: fromAddress,
              to: email,
-             subject: `Objednávka č. ${orderId} - Zelený Zvon`,
-             text: `Děkujeme za objednávku! Faktura a QR kód k platbě jsou v příloze.`,
-             attachments: [{ filename: `Zalohova_faktura_${orderId}.pdf`, content: pdfData }]
+             subject: `Zálohová faktura - objednávka č. ${orderId} - Zelený Zvon`,
+             html: htmlTemplate,
+             attachments: [
+                 { filename: \`Zalohova_faktura_${orderId}.pdf\`, content: pdfData },
+                 { filename: 'qrcode.png', content: qrBufferEmail, cid: 'qrcode_image' }
+             ]
            });
 
            if (transporter.options.host === 'smtp.ethereal.email') {
@@ -405,31 +465,85 @@ async function generateAndSendInvoice(orderId, name, email, amount, items, qrCod
          }
      });
 
-     // Header
-     doc.fontSize(24).text('Zelený Zvon', { align: 'center' });
+     // Header PDF
+     doc.font('Roboto-Bold').fontSize(26).fillColor('#765a17').text('Zelený Zvon', { align: 'center' });
      doc.moveDown(0.5);
-     doc.fontSize(16).text('Výzva k platbě / Zálohová faktura', { align: 'center' });
+     doc.font('Roboto').fontSize(16).fillColor('#1b1c19').text('Zálohová faktura / Výzva k platbě', { align: 'center' });
      doc.moveDown(2);
 
-     // Details
-     doc.fontSize(12).text(`Číslo objednávky: ${orderId}`);
-     doc.text(`Zákazník: ${name}`);
-     doc.text(`Celková částka k úhradě: ${amount} Kč`);
-     doc.moveDown(1);
+     const topY = doc.y;
      
-     doc.text('Prosíme o úhradu na účet: 1570560063/0800');
-     doc.text(`Variabilní symbol: ${orderId}`);
-     doc.moveDown(2);
+     // Dodavatel
+     doc.font('Roboto-Bold').fontSize(12).text('Dodavatel:');
+     doc.font('Roboto').text('Zelený Zvon\\nE-mail: info@zelenyzvon.cz');
+     
+     doc.y = topY;
+     doc.x = 300;
+     // Odběratel
+     doc.font('Roboto-Bold').fontSize(12).text('Odběratel:');
+     doc.font('Roboto').text(name || 'Neznámý zákazník');
+     if (address) {
+         doc.text(address, { width: 200 });
+     } else {
+         doc.text(email);
+     }
+     
+     doc.x = 50;
+     doc.moveDown(3);
+
+     // Order Info
+     doc.font('Roboto-Bold').fontSize(14).fillColor('#765a17').text(\`Číslo objednávky: \${orderId}\`);
+     doc.moveDown(1);
+
+     // Table Header
+     doc.rect(50, doc.y, 500, 20).fill('#f6f5f1');
+     doc.fillColor('#1b1c19').font('Roboto-Bold').fontSize(10);
+     doc.text('Položka', 60, doc.y + 5);
+     doc.text('Množství', 350, doc.y - 12);
+     doc.text('Cena celkem', 450, doc.y - 12);
+     doc.moveDown(1.5);
+
+     // Table items
+     let currentY = doc.y;
+     doc.font('Roboto').fontSize(10);
+     itemDetails.forEach((item, i) => {
+        doc.text(item.name, 60, currentY);
+        doc.text(\`\${item.quantity} ks\`, 350, currentY);
+        doc.text(\`\${item.quantity * item.price} Kč\`, 450, currentY);
+        currentY += 20;
+        doc.moveTo(50, currentY - 5).lineTo(550, currentY - 5).lineWidth(0.5).strokeOpacity(0.2).stroke();
+     });
+     
+     doc.y = currentY + 20;
+
+     // Total
+     doc.font('Roboto-Bold').fontSize(14).fillColor('#765a17').text(\`Celková částka: \${amount} Kč\`, { align: 'right' });
+     doc.moveDown(3);
+
+     // Payment Details & QR box
+     const boxY = doc.y;
+     doc.rect(50, boxY, 500, 150).lineWidth(1).strokeOpacity(1).strokeColor('#765a17').stroke();
+     
+     doc.x = 70;
+     doc.y = boxY + 20;
+     doc.font('Roboto-Bold').fontSize(12).fillColor('#1b1c19').text('Platební údaje:');
+     doc.moveDown(0.5);
+     doc.font('Roboto').text('Prosíme o úhradu převodem.\\n\\n' +
+        \`Číslo účtu: 1570560063/0800\\n\` +
+        \`Variabilní symbol: \${orderId}\\n\` +
+        \`Částka k úhradě: \${amount} Kč\`
+     );
 
      // Insert QR Code
-     const base64Data = qrCodeDataUrl.replace(/^data:image\/png;base64,/, "");
+     const base64Data = qrCodeDataUrl.replace(/^data:image\\/png;base64,/, "");
      const qrBuffer = Buffer.from(base64Data, 'base64');
-     doc.image(qrBuffer, (doc.page.width - 200)/2, doc.y, { width: 200, align: 'center' });
-     doc.moveDown(1);
+     doc.image(qrBuffer, 380, boxY + 15, { width: 120 });
+     
+     doc.x = 50;
 
      // Footer
-     doc.y = doc.page.height - 100;
-     doc.fontSize(10).text('Děkujeme za váš nákup na Zelený Zvon!', { align: 'center', color: 'grey' });
+     doc.y = doc.page.height - 70;
+     doc.fontSize(10).fillColor('grey').text('Děkujeme za váš nákup u Zelený Zvon!', { align: 'center' });
 
      doc.end();
   } catch (e) {
