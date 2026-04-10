@@ -5,16 +5,23 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export default function AdminPage() {
   const [token, setToken] = useState(localStorage.getItem('adminToken') || null);
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders' or 'products'
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'products', 'coupons'
   
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
+  const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Form for new product
+  // Form for products
+  const [editingProductId, setEditingProductId] = useState(null);
   const [newProduct, setNewProduct] = useState({
     name: '', price: '', category: '', description: '', image: '', stock: 10, is_hero: false
+  });
+  
+  // Form for coupons
+  const [newCoupon, setNewCoupon] = useState({
+    code: '', discount_type: 'percent', discount_value: '', usage_limit: ''
   });
 
   const handleLoginSuccess = async (response) => {
@@ -51,7 +58,10 @@ export default function AdminPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const url = activeTab === 'orders' ? `${API_URL}/orders` : `${API_URL}/products`;
+      let url = `${API_URL}/orders`;
+      if (activeTab === 'products') url = `${API_URL}/products`;
+      else if (activeTab === 'coupons') url = `${API_URL}/coupons`;
+
       const res = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -63,7 +73,8 @@ export default function AdminPage() {
       }
       const data = await res.json();
       if (activeTab === 'orders') setOrders(data);
-      else setProducts(data);
+      else if (activeTab === 'products') setProducts(data);
+      else if (activeTab === 'coupons') setCoupons(data);
     } catch (e) {
       console.error(e);
     } finally {
@@ -74,8 +85,10 @@ export default function AdminPage() {
   const handleAddProduct = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_URL}/products`, {
-        method: 'POST',
+      const url = editingProductId ? `${API_URL}/products/${editingProductId}` : `${API_URL}/products`;
+      const method = editingProductId ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -87,8 +100,9 @@ export default function AdminPage() {
         })
       });
       if (res.ok) {
-        alert('Produkt vložena');
+        alert(editingProductId ? 'Produkt upraven' : 'Produkt vložen');
         setNewProduct({ name: '', price: '', category: '', description: '', image: '', stock: 10, is_hero: false });
+        setEditingProductId(null);
         fetchData(); // refresh
       } else {
         alert('Chyba při ukládání');
@@ -96,6 +110,56 @@ export default function AdminPage() {
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleEditProduct = (p) => {
+    setEditingProductId(p.id);
+    setNewProduct({ ...p });
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (!window.confirm('Opravdu chcete tento produkt smazat?')) return;
+    try {
+      const res = await fetch(`${API_URL}/products/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleAddCoupon = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_URL}/coupons`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          ...newCoupon,
+          discount_value: Number(newCoupon.discount_value)
+        })
+      });
+      if (res.ok) {
+        alert('Kupón vytvořen');
+        setNewCoupon({ code: '', discount_type: 'percent', discount_value: '', usage_limit: '' });
+        fetchData();
+      } else {
+         alert('Chyba při ukládání kupónu');
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const handleDeleteCoupon = async (id) => {
+    if (!window.confirm('Opravdu chcete tento kupón smazat?')) return;
+    try {
+      const res = await fetch(`${API_URL}/coupons/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) fetchData();
+    } catch (e) { console.error(e); }
   };
 
   const handleUpdateOrderStatus = async (id, status) => {
@@ -150,6 +214,12 @@ export default function AdminPage() {
           className={`px-6 py-2 rounded-full font-bold transition-colors ${activeTab === 'products' ? 'bg-[#765a17] text-white' : 'bg-surface-container-low hover:bg-surface-container-high'}`}
         >
           Produkty
+        </button>
+        <button 
+          onClick={() => setActiveTab('coupons')}
+          className={`px-6 py-2 rounded-full font-bold transition-colors ${activeTab === 'coupons' ? 'bg-[#765a17] text-white' : 'bg-surface-container-low hover:bg-surface-container-high'}`}
+        >
+          Kupóny
         </button>
       </div>
 
@@ -212,6 +282,7 @@ export default function AdminPage() {
                     <th className="p-4 font-bold">Cena</th>
                     <th className="p-4 font-bold">Skladem</th>
                     <th className="p-4 font-bold">Doporučeno</th>
+                    <th className="p-4 font-bold">Akce</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -229,6 +300,10 @@ export default function AdminPage() {
                       <td className="p-4">
                          {p.is_hero === 1 && <span className="bg-[#765a17] text-white px-2 py-1 rounded text-xs">Ano</span>}
                       </td>
+                      <td className="p-4 flex gap-2">
+                         <button onClick={() => handleEditProduct(p)} className="text-xs font-bold text-[#765a17] hover:underline">Úprava</button>
+                         <button onClick={() => handleDeleteProduct(p.id)} className="text-xs font-bold text-red-600 hover:underline">Smazat</button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -237,7 +312,12 @@ export default function AdminPage() {
 
            <div>
               <div className="bg-surface-container-low p-6 rounded-2xl sticky top-24">
-                <h3 className="font-notoserif text-2xl italic mb-6">Přidat nový produkt</h3>
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="font-notoserif text-2xl italic">{editingProductId ? 'Upravit produkt' : 'Přidat nový produkt'}</h3>
+                  {editingProductId && (
+                     <button type="button" onClick={() => { setEditingProductId(null); setNewProduct({ name: '', price: '', category: '', description: '', image: '', stock: 10, is_hero: false }); }} className="text-xs uppercase font-bold opacity-60 hover:opacity-100">Zrušit</button>
+                  )}
+                </div>
                 <form onSubmit={handleAddProduct} className="space-y-4">
                    <div>
                       <label className="block text-xs font-bold uppercase tracking-wider opacity-70 mb-1">Název</label>
@@ -271,13 +351,75 @@ export default function AdminPage() {
                    </div>
                    
                    <button type="submit" className="w-full py-3 bg-[#765a17] text-white font-bold rounded-lg hover:bg-[#5b4300] transition-colors mt-6">
-                     Vložit produkt do nabídky
+                     {editingProductId ? 'Uložit změny' : 'Vložit produkt do nabídky'}
                    </button>
                 </form>
               </div>
-           </div>
-        </div>
-      )}
+            </div>
+         </div>
+       )}
+
+       {!loading && activeTab === 'coupons' && (
+         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm border border-[#765a17]/10">
+               <table className="w-full text-left border-collapse">
+                 <thead>
+                   <tr className="bg-surface-container-low text-sm uppercase tracking-wider opacity-80">
+                     <th className="p-4 font-bold">Kód</th>
+                     <th className="p-4 font-bold">Hodnota</th>
+                     <th className="p-4 font-bold">Využito</th>
+                     <th className="p-4 font-bold">Akce</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   {coupons.map(c => (
+                     <tr key={c.id} className="border-t border-[#765a17]/10 hover:bg-surface-container-low/50">
+                       <td className="p-4 font-bold font-mono">{c.code}</td>
+                       <td className="p-4 font-bold">{c.discount_type === 'percent' ? `${c.discount_value} %` : `${c.discount_value} Kč`}</td>
+                       <td className="p-4">{c.times_used} {c.usage_limit ? `/ ${c.usage_limit}` : ''}</td>
+                       <td className="p-4">
+                          <button onClick={() => handleDeleteCoupon(c.id)} className="text-xs font-bold text-red-600 hover:underline">Smazat</button>
+                       </td>
+                     </tr>
+                   ))}
+                 </tbody>
+               </table>
+            </div>
+
+            <div>
+               <div className="bg-surface-container-low p-6 rounded-2xl sticky top-24">
+                 <h3 className="font-notoserif text-2xl italic mb-6">Nový kupón</h3>
+                 <form onSubmit={handleAddCoupon} className="space-y-4">
+                    <div>
+                       <label className="block text-xs font-bold uppercase tracking-wider opacity-70 mb-1">Kód</label>
+                       <input required type="text" placeholder="SLEVA20" value={newCoupon.code} onChange={e => setNewCoupon({...newCoupon, code: e.target.value.toUpperCase()})} className="w-full p-2 rounded bg-[#faf9f4] border-none font-mono" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                         <label className="block text-xs font-bold uppercase tracking-wider opacity-70 mb-1">Typ slevy</label>
+                         <select value={newCoupon.discount_type} onChange={e => setNewCoupon({...newCoupon, discount_type: e.target.value})} className="w-full p-2 rounded bg-[#faf9f4] border-none">
+                            <option value="percent">Procenta</option>
+                            <option value="fixed">Částka (Kč)</option>
+                         </select>
+                      </div>
+                      <div>
+                         <label className="block text-xs font-bold uppercase tracking-wider opacity-70 mb-1">Hodnota</label>
+                         <input required type="number" value={newCoupon.discount_value} onChange={e => setNewCoupon({...newCoupon, discount_value: e.target.value})} className="w-full p-2 rounded bg-[#faf9f4] border-none" />
+                      </div>
+                    </div>
+                    <div>
+                       <label className="block text-xs font-bold uppercase tracking-wider opacity-70 mb-1">Limit (počet použití)</label>
+                       <input type="number" placeholder="Prázdné = neomezeno" value={newCoupon.usage_limit} onChange={e => setNewCoupon({...newCoupon, usage_limit: e.target.value})} className="w-full p-2 rounded bg-[#faf9f4] border-none" />
+                    </div>
+                    
+                    <button type="submit" className="w-full py-3 bg-[#765a17] text-white font-bold rounded-lg hover:bg-[#5b4300] transition-colors mt-6">
+                      Vytvořit kupón
+                    </button>
+                 </form>
+               </div>
+            </div>
+         </div>
+       )}
     </main>
   );
 }
