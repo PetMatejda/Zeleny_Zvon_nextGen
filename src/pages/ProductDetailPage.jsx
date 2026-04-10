@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
 export default function ProductDetailPage() {
   const { id } = useParams();
   const { addToCart } = useCart();
@@ -9,7 +11,7 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/products')
+    fetch(`${API_URL}/products`)
       .then(res => res.json())
       .then(data => {
         const p = data.find(item => item.id.toString() === id);

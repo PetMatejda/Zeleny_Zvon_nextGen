@@ -5,8 +5,13 @@ import EShopPage from './pages/EShopPage';
 import ServicesPage from './pages/ServicesPage';
 import ContactPage from './pages/ContactPage';
 import AboutPage from './pages/AboutPage';
+import CheckoutPage from './pages/CheckoutPage';
+import SuccessPage from './pages/SuccessPage';
+import AdminPage from './pages/AdminPage';
+import { useCart } from './context/CartContext';
 
 function Navigation() {
+  const { cartAmount } = useCart();
   return (
     <header className="docked full-width top-0 sticky z-50 bg-[#faf9f4] dark:bg-[#101f0d] bg-opacity-80 backdrop-blur-xl shadow-[0_20px_40px_rgba(15,30,12,0.04)]">
       <nav className="flex justify-between items-center max-w-7xl mx-auto px-8 py-4">
@@ -28,12 +33,17 @@ function Navigation() {
           </Link>
         </div>
         <div className="flex items-center space-x-6 text-[#000000] dark:text-[#faf9f4]">
-          <Link to="/eshop" className="transition-all duration-300 ease-in-out hover:opacity-80 active:scale-95 transition-transform duration-200">
+          <Link to="/checkout" className="relative transition-all duration-300 ease-in-out hover:opacity-80 active:scale-95 transition-transform duration-200">
             <span className="material-symbols-outlined">shopping_cart</span>
+            {cartAmount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-[#ffdf9f] text-[#101f0d] text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                {cartAmount}
+              </span>
+            )}
           </Link>
-          <button className="transition-all duration-300 ease-in-out hover:opacity-80 active:scale-95 transition-transform duration-200">
+          <Link to="/admin" className="transition-all duration-300 ease-in-out hover:opacity-80 active:scale-95 transition-transform duration-200">
             <span className="material-symbols-outlined">person</span>
-          </button>
+          </Link>
         </div>
       </nav>
     </header>
@@ -90,6 +100,9 @@ export default function App() {
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/checkout/success" element={<SuccessPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </div>
       <Footer />
