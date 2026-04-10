@@ -149,20 +149,26 @@ function authenticateToken(req, res, next) {
 // Auth API
 app.post('/api/auth/google', async (req, res) => {
   const { credential } = req.body;
+  
+  const ALLOWED_ADMINS = ['petmatejda@gmail.com', 'peta.matejickova@gmail.com'];
+
   try {
     const ticket = await oAuth2Client.verifyIdToken({
       idToken: credential,
-      audience: GOOGLE_CLIENT_ID, // Use actual client ID in production
+      audience: GOOGLE_CLIENT_ID,
     });
     const payload = ticket.getPayload();
-    // In strict mode, we'd only allow ADMIN_EMAIL. Let's allow for testing purposes.
+    
+    if (!ALLOWED_ADMINS.includes(payload.email.toLowerCase())) {
+       console.warn(`Neoprávněný pokus o přihlášení: ${payload.email}`);
+       return res.status(403).json({ error: 'Přihlášení zamítnuto: Nemáte oprávnění k administraci.' });
+    }
+
     const token = jwt.sign({ email: payload.email, admin: true }, JWT_SECRET, { expiresIn: '8h' });
     res.json({ token });
   } catch (error) {
-    // Fallback for missing/bad configs during dev: allow any login as an admin
-    console.warn("Google auth verification failed or not configured, falling back to dummy token");
-    const token = jwt.sign({ email: ADMIN_EMAIL, admin: true }, JWT_SECRET, { expiresIn: '8h' });
-    res.json({ token });
+    console.error("Google verify error:", error.message);
+    res.status(401).json({ error: 'Neplatný přihlašovací token.' });
   }
 });
 
