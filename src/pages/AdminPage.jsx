@@ -85,10 +85,10 @@ export default function AdminPage() {
     }
   };
 
-  const fetchOrderDetails = async (id) => {
+  const fetchOrderDetails = async (order) => {
     try {
-      const res = await fetch(`${API_URL}/orders/${id}/items`, { headers: { 'Authorization': `Bearer ${token}` }});
-      if (res.ok) setSelectedOrderDetails({ id, items: await res.json() });
+      const res = await fetch(`${API_URL}/orders/${order.id}/items`, { headers: { 'Authorization': `Bearer ${token}` }});
+      if (res.ok) setSelectedOrderDetails({ ...order, items: await res.json() });
     } catch(e) { console.error(e); }
   };
 
@@ -294,7 +294,7 @@ export default function AdminPage() {
                      </select>
                   </td>
                   <td className="p-4">
-                     <button onClick={() => fetchOrderDetails(o.id)} className="text-sm text-[#765a17] hover:underline font-bold">Detail</button>
+                     <button onClick={() => fetchOrderDetails(o)} className="text-sm text-[#765a17] hover:underline font-bold">Detail</button>
                   </td>
                 </tr>
               ))}
@@ -306,11 +306,24 @@ export default function AdminPage() {
       {selectedOrderDetails && (
          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
             <div className="bg-surface-container-lowest w-full max-w-lg p-6 rounded-2xl shadow-xl">
-               <div className="flex justify-between items-center mb-6">
+               <div className="flex justify-between items-center mb-4">
                  <h2 className="text-2xl font-headline italic">Detail Obj. #{selectedOrderDetails.id}</h2>
                  <button onClick={() => setSelectedOrderDetails(null)} className="text-xl font-bold opacity-50 hover:opacity-100">&times;</button>
                </div>
-               <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+               
+               <div className="mb-4 pb-4 border-b border-[#765a17]/20">
+                  <h3 className="text-sm font-bold uppercase tracking-wider opacity-70 mb-2">Údaje zákazníka</h3>
+                  <p className="font-bold">{selectedOrderDetails.customerName}</p>
+                  <p className="text-sm">{selectedOrderDetails.email}</p>
+                  {selectedOrderDetails.address && (
+                     <div className="mt-2 p-3 bg-[#faf9f4] rounded-lg border border-[#765a17]/20 font-mono text-sm whitespace-pre-line text-[#1b1c19]">
+                        {selectedOrderDetails.address}
+                     </div>
+                  )}
+               </div>
+
+               <h3 className="text-sm font-bold uppercase tracking-wider opacity-70 mb-3">Položky</h3>
+               <div className="space-y-4 max-h-[40vh] overflow-y-auto">
                  {selectedOrderDetails.items.map(item => (
                    <div key={item.id} className="flex gap-4 items-center bg-surface-container-low p-3 rounded-lg border border-[#765a17]/10">
                       <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
