@@ -206,7 +206,7 @@ export default function AboutPage() {
               <div className="relative mb-6 overflow-hidden rounded-xl aspect-[3/4]">
                 <img 
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-NrF7_KzigsUuYg6rDSNvRsHB4fiiXxsFiCJWjkqwBoANWJ6t30Kb9zAgNzriiQLDp9Y9OgwwccxQTT-i9v1hj5vVW8yPt0CX7XTRWjkFiHdjFpmvTi2dDH8xS8uI4GB42j7NPPAommVvdBPuuRg6GlFvO9wErCPVq3KV7I1RBd6GuPG3N6gRlAOwhwsHwDYJpEMTb1lRRhaeM3KB3iCtL4kFeoLz1YHrzJH-HOeviK46wKfRBDP5Q86zwgjodhhMXpfQ_Gvt-4M"
+                  src="/petr.png"
                   alt="Petr Matějíček"
                 />
                 <div className="absolute inset-0 bg-[#765a17]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -220,7 +220,7 @@ export default function AboutPage() {
               <div className="relative mb-6 overflow-hidden rounded-xl aspect-[3/4]">
                 <img 
                   className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7e3X6H_RXYAONX1s6k6P6jFqV_1c7w1n6n6xG_gI_J2J-u1X7G0sK6H-S3x4XN4K0Hw1eW9F8388G4T4tJ_Yn5tH_1b4O2Q6hBf3h8k5LwT2W1I-_P2i8O7gK2O6h3J1o5A9N5X_E3r1F0Z_Y465E3kX5H4N9w6J5h1l-H6vH8w2j8w_9OQwM2X0W9a4x2jX-J_3e"
+                  src="/simon.png"
                   alt="Šimon Matějíček"
                 />
                 <div className="absolute inset-0 bg-[#765a17]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -256,21 +256,21 @@ export default function AboutPage() {
                 <span className="material-symbols-outlined text-[#765a17] text-2xl">location_on</span>
                 <div>
                   <h4 className="font-notoserif text-lg">Kde nás najdete</h4>
-                  <p className="text-on-surface-variant">Rezidenční čtvrť, Zvonná 12<br/>Praha 1, 110 00</p>
+                  <p className="text-on-surface-variant">Nad sadem 542/19<br/>Praha 10, 111 01</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <span className="material-symbols-outlined text-[#765a17] text-2xl">mail</span>
                 <div>
                   <h4 className="font-notoserif text-lg">Napište nám</h4>
-                  <p className="text-on-surface-variant">ahoj@zelenyzvon.cz</p>
+                  <p className="text-on-surface-variant">info@zelenyzvon.cz</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
-                <span className="material-symbols-outlined text-[#765a17] text-2xl">schedule</span>
+                <span className="material-symbols-outlined text-[#765a17] text-2xl">call</span>
                 <div>
-                  <h4 className="font-notoserif text-lg">Otevírací doba</h4>
-                  <p className="text-on-surface-variant">Po - Pá: 08:00 - 20:00<br/>So: 09:00 - 15:00</p>
+                  <h4 className="font-notoserif text-lg">Zavolejte nám</h4>
+                  <p className="text-on-surface-variant">+420 771 187 776</p>
                 </div>
               </div>
             </div>
