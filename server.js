@@ -450,7 +450,7 @@ async function generateAndSendInvoice(orderId, name, email, address, amount, ite
              subject: `Zálohová faktura - objednávka č. ${orderId} - Zelený Zvon`,
              html: htmlTemplate,
              attachments: [
-                 { filename: \`Zalohova_faktura_${orderId}.pdf\`, content: pdfData },
+                 { filename: `Zalohova_faktura_${orderId}.pdf`, content: pdfData },
                  { filename: 'qrcode.png', content: qrBufferEmail, cid: 'qrcode_image' }
              ]
            });
@@ -475,7 +475,7 @@ async function generateAndSendInvoice(orderId, name, email, address, amount, ite
      
      // Dodavatel
      doc.font('Roboto-Bold').fontSize(12).text('Dodavatel:');
-     doc.font('Roboto').text('Zelený Zvon\\nE-mail: info@zelenyzvon.cz');
+     doc.font('Roboto').text('Zelený Zvon\nE-mail: info@zelenyzvon.cz');
      
      doc.y = topY;
      doc.x = 300;
@@ -492,7 +492,7 @@ async function generateAndSendInvoice(orderId, name, email, address, amount, ite
      doc.moveDown(3);
 
      // Order Info
-     doc.font('Roboto-Bold').fontSize(14).fillColor('#765a17').text(\`Číslo objednávky: \${orderId}\`);
+     doc.font('Roboto-Bold').fontSize(14).fillColor('#765a17').text(`Číslo objednávky: ${orderId}`);
      doc.moveDown(1);
 
      // Table Header
@@ -508,8 +508,8 @@ async function generateAndSendInvoice(orderId, name, email, address, amount, ite
      doc.font('Roboto').fontSize(10);
      itemDetails.forEach((item, i) => {
         doc.text(item.name, 60, currentY);
-        doc.text(\`\${item.quantity} ks\`, 350, currentY);
-        doc.text(\`\${item.quantity * item.price} Kč\`, 450, currentY);
+        doc.text(`${item.quantity} ks`, 350, currentY);
+        doc.text(`${item.quantity * item.price} Kč`, 450, currentY);
         currentY += 20;
         doc.moveTo(50, currentY - 5).lineTo(550, currentY - 5).lineWidth(0.5).strokeOpacity(0.2).stroke();
      });
@@ -517,7 +517,7 @@ async function generateAndSendInvoice(orderId, name, email, address, amount, ite
      doc.y = currentY + 20;
 
      // Total
-     doc.font('Roboto-Bold').fontSize(14).fillColor('#765a17').text(\`Celková částka: \${amount} Kč\`, { align: 'right' });
+     doc.font('Roboto-Bold').fontSize(14).fillColor('#765a17').text(`Celková částka: ${amount} Kč`, { align: 'right' });
      doc.moveDown(3);
 
      // Payment Details & QR box
@@ -528,14 +528,14 @@ async function generateAndSendInvoice(orderId, name, email, address, amount, ite
      doc.y = boxY + 20;
      doc.font('Roboto-Bold').fontSize(12).fillColor('#1b1c19').text('Platební údaje:');
      doc.moveDown(0.5);
-     doc.font('Roboto').text('Prosíme o úhradu převodem.\\n\\n' +
-        \`Číslo účtu: 1570560063/0800\\n\` +
-        \`Variabilní symbol: \${orderId}\\n\` +
-        \`Částka k úhradě: \${amount} Kč\`
+     doc.font('Roboto').text('Prosíme o úhradu převodem.\n\n' +
+        `Číslo účtu: 1570560063/0800\n` +
+        `Variabilní symbol: ${orderId}\n` +
+        `Částka k úhradě: ${amount} Kč`
      );
 
      // Insert QR Code
-     const base64Data = qrCodeDataUrl.replace(/^data:image\\/png;base64,/, "");
+     const base64Data = qrCodeDataUrl.replace(/^data:image\/png;base64,/, "");
      const qrBuffer = Buffer.from(base64Data, 'base64');
      doc.image(qrBuffer, 380, boxY + 15, { width: 120 });
      
@@ -550,6 +550,7 @@ async function generateAndSendInvoice(orderId, name, email, address, amount, ite
      console.error('Došlo k chybě při generování faktury:', e);
   }
 }
+
 
 app.listen(port, () => {
   console.log(`Backend server running at http://localhost:${port}`);
