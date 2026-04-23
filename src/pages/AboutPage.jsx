@@ -1,7 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export default function AboutPage() {
+  const [products, setProducts] = useState([]);
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    fetch(`${API_URL}/products`)
+      .then(res => res.json())
+      .then(data => {
+        setProducts(data.slice(0, 3));
+      })
+      .catch(err => console.error(err));
+  }, []);
+
   return (
     <main className="font-plusjakarta">
       {/* Hero Section */}
@@ -174,61 +189,62 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Our Team / Náš tým */}
-      <section className="py-32 bg-primary-container text-on-primary">
+      {/* Our Products / Naše produkty */}
+      <section className="py-32 bg-surface-container-low text-on-surface">
         <div className="max-w-7xl mx-auto px-8">
           <div className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="text-4xl font-notoserif mb-4 text-[#faf9f4]">Náš tým</h2>
-              <p className="text-on-primary-container max-w-lg">Rodinné studio. Každý z nás přináší unikátní pohled a společně se staráme o harmonický chod Zeleného Zvonu.</p>
+              <h2 className="text-4xl font-notoserif mb-4 text-primary-container">Kousek Zeleného Zvonu u vás doma</h2>
+              <p className="text-on-surface-variant max-w-2xl leading-relaxed">V našich terapiích využíváme sílu čisté přírody. Tyto a mnoho dalších produktů sami každodenně používáme, a proto je nabízíme i vám, abyste si mohli vytvořit kousek naší atmosféry i u sebe doma.</p>
             </div>
             <div className="mt-8 md:mt-0">
-              <button className="bg-secondary-fixed text-on-secondary-fixed px-8 py-4 rounded-full font-semibold hover:bg-secondary-fixed-dim transition-colors">Přidejte se k nám</button>
+              <Link to="/eshop" className="bg-primary-container text-on-primary px-8 py-4 rounded-full font-semibold hover:shadow-lg transition-all inline-block">
+                Celá nabídka e-shopu
+              </Link>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {/* Team Member 1 */}
-            <div className="group">
-              <div className="relative mb-6 overflow-hidden rounded-xl aspect-[3/4]">
-                <img 
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
-                  src="https://be43f77103.clvaw-cdnwnd.com/7e020fcf408e821cb2e88418c25b9f42/200004532-b1326b132a/9X6A9899%20kopie%202-001px.jpeg?ph=be43f77103"
-                  alt="Petra Matějíčková"
-                />
-                <div className="absolute inset-0 bg-[#765a17]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {products.map(product => (
+              <div key={product.id} className="group flex flex-col justify-between h-full">
+                <div className="relative overflow-hidden rounded-xl bg-surface-container-high mb-4 aspect-[4/5] cursor-pointer">
+                  <div className="block h-full w-full bg-surface-container-highest/30">
+                    <img 
+                      alt={product.name} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                      src={product.image || 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&q=80&w=600'} 
+                      onError={(e) => e.target.src = 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&q=80&w=600'}
+                    />
+                  </div>
+                  <button 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      addToCart(product);
+                    }}
+                    className="absolute bottom-4 right-4 bg-surface-container-lowest/90 backdrop-blur-md p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:scale-110"
+                  >
+                    <span className="material-symbols-outlined text-primary-container">shopping_bag</span>
+                  </button>
+                </div>
+                <div className="px-2 flex-grow flex flex-col justify-end">
+                  <p className="text-[10px] uppercase tracking-widest text-[#765a17] dark:text-[#ffdf9f] font-bold mb-1">{product.category}</p>
+                  <h3 className="text-lg font-notoserif text-on-surface leading-tight mb-2">
+                    {product.name}
+                  </h3>
+                  <div className="flex justify-between items-center mt-auto pt-2">
+                    <span className="text-lg font-semibold">{product.price?.toLocaleString('cs-CZ')} Kč</span>
+                    <button 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        addToCart(product);
+                      }}
+                      className="text-sm font-medium text-[#765a17] dark:text-[#ffdf9f] underline underline-offset-4 hover:text-primary-container transition-colors"
+                    >
+                      Vložit do košíku
+                    </button>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-2xl font-notoserif mb-1 text-[#faf9f4]">Petra Matějíčková</h3>
-              <p className="text-on-primary-container font-plusjakarta uppercase tracking-widest text-xs mb-4">Zakladatelka & Terapeutka</p>
-              <p className="text-sm opacity-80 leading-relaxed text-[#faf9f4]">Odbornice s letitými zkušenostmi a srdce celého studia. Každému klientovi věnuje plnou a laskavou pozornost na jeho cestě k seberegulaci.</p>
-            </div>
-            {/* Team Member 2 */}
-            <div className="group">
-              <div className="relative mb-6 overflow-hidden rounded-xl aspect-[3/4]">
-                <img 
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
-                  src="/petr.png"
-                  alt="Petr Matějíček"
-                />
-                <div className="absolute inset-0 bg-[#765a17]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              </div>
-              <h3 className="text-2xl font-notoserif mb-1 text-[#faf9f4]">Petr Matějíček</h3>
-              <p className="text-on-primary-container font-plusjakarta uppercase tracking-widest text-xs mb-4">Operations & IT</p>
-              <p className="text-sm opacity-80 leading-relaxed text-[#faf9f4]">Stojí za hladkým chodem všeho, co není na první pohled vidět. Pečuje o infrastrukturu, e-shop a komunikaci s vnějším světem.</p>
-            </div>
-            {/* Team Member 3 */}
-            <div className="group">
-              <div className="relative mb-6 overflow-hidden rounded-xl aspect-[3/4]">
-                <img 
-                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
-                  src="/simon.png"
-                  alt="Šimon Matějíček"
-                />
-                <div className="absolute inset-0 bg-[#765a17]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              </div>
-              <h3 className="text-2xl font-notoserif mb-1 text-[#faf9f4]">Šimon Matějíček</h3>
-              <p className="text-on-primary-container font-plusjakarta uppercase tracking-widest text-xs mb-4">Logistika & Marketing</p>
-              <p className="text-sm opacity-80 leading-relaxed text-[#faf9f4]">Zajišťuje bezpečné doručení e-shopových objednávek a pomáhá šířit povědomí o Zeleném Zvonu do světa.</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
