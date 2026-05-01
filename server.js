@@ -89,6 +89,14 @@ function initDb() {
       }
     });
 
+    // Automaticky doplnime sloupec slug do products, pokud chybi
+    db.all("PRAGMA table_info(products)", (err, columns) => {
+      if (columns && !columns.some(c => c.name === 'slug')) {
+        db.run("ALTER TABLE products ADD COLUMN slug TEXT");
+        console.log('Sloupec slug pridan do tabulky products');
+      }
+    });
+
     db.run(`CREATE TABLE IF NOT EXISTS orders (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       customerName TEXT NOT NULL,
@@ -294,26 +302,42 @@ app.get('/api/products', (req, res) => {
   });
 });
 
+// Načtení produktu dle URL slugu (pro stránku detailu)
+app.get('/api/products/by-slug/:slug', (req, res) => {
+  db.get('SELECT * FROM products WHERE slug = ?', [req.params.slug], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: 'Produkt nenalezen' });
+    res.json(row);
+  });
+});
+
 // Added authenticateToken for protection
 app.post('/api/products', authenticateToken, (req, res) => {
-  const { name, price, category, description, image, stock, is_hero } = req.body;
+  const { name, price, category, description, image, stock, is_hero, slug } = req.body;
   const isHeroVal = is_hero ? 1 : 0;
   const stockVal = stock || 0;
-  db.run('INSERT INTO products (name, price, category, description, image, stock, is_hero) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [name, price, category, description, image, stockVal, isHeroVal],
+  // Auto-generace slugu z nazvu, pokud nebyl zadán
+  const slugVal = slug || name.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+  db.run('INSERT INTO products (name, price, category, description, image, stock, is_hero, slug) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [name, price, category, description, image, stockVal, isHeroVal, slugVal],
     function(err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: this.lastID, name, price, category, description, image, stock: stockVal, is_hero: isHeroVal });
+      res.json({ id: this.lastID, name, price, category, description, image, stock: stockVal, is_hero: isHeroVal, slug: slugVal });
     }
   );
 });
 
 app.put('/api/products/:id', authenticateToken, (req, res) => {
-  const { name, price, category, description, image, stock, is_hero } = req.body;
+  const { name, price, category, description, image, stock, is_hero, slug } = req.body;
   const isHeroVal = is_hero ? 1 : 0;
   const stockVal = stock || 0;
-  db.run('UPDATE products SET name = ?, price = ?, category = ?, description = ?, image = ?, stock = ?, is_hero = ? WHERE id = ?',
-    [name, price, category, description, image, stockVal, isHeroVal, req.params.id],
+  const slugVal = slug || name.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+  db.run('UPDATE products SET name = ?, price = ?, category = ?, description = ?, image = ?, stock = ?, is_hero = ?, slug = ? WHERE id = ?',
+    [name, price, category, description, image, stockVal, isHeroVal, slugVal, req.params.id],
     function(err) {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ success: true });

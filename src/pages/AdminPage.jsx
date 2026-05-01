@@ -20,7 +20,7 @@ export default function AdminPage() {
   // Form for products
   const [editingProductId, setEditingProductId] = useState(null);
   const [newProduct, setNewProduct] = useState({
-    name: '', price: '', category: '', description: '', image: '', stock: 10, is_hero: false
+    name: '', price: '', category: '', description: '', image: '', stock: 10, is_hero: false, slug: ''
   });
   
   // Form for coupons
@@ -133,7 +133,7 @@ export default function AdminPage() {
       });
       if (res.ok) {
         alert(editingProductId ? 'Produkt upraven' : 'Produkt vložen');
-        setNewProduct({ name: '', price: '', category: '', description: '', image: '', stock: 10, is_hero: false });
+        setNewProduct({ name: '', price: '', category: '', description: '', image: '', stock: 10, is_hero: false, slug: '' });
         setEditingProductId(null);
         fetchData(); // refresh
       } else {
@@ -394,6 +394,7 @@ export default function AdminPage() {
                          <div>
                            <p className="font-bold text-sm">{p.name}</p>
                            <p className="text-xs opacity-60">{p.category}</p>
+                           {p.slug && <p className="text-xs font-mono opacity-40">/{p.slug}</p>}
                          </div>
                       </td>
                       <td className="p-4 font-bold">{p.price} Kč</td>
@@ -454,6 +455,18 @@ export default function AdminPage() {
                       <label htmlFor="hero" className="font-bold text-sm">Označit jako "Doporučujeme" (Hero)</label>
                    </div>
                    
+                   <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider opacity-70 mb-1">URL Slug <span className="normal-case font-normal opacity-60">(nepovinné — auto-generace z názvu)</span></label>
+                      <input
+                        type="text"
+                        placeholder="napr. laktera-nature-250g"
+                        value={newProduct.slug}
+                        onChange={e => setNewProduct({...newProduct, slug: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')})}
+                        className="w-full p-2 rounded bg-[#faf9f4] border-none font-mono text-sm"
+                      />
+                      <p className="text-xs opacity-50 mt-1">Slouží jako URL produktu: /eshop/<em>slug</em></p>
+                   </div>
+
                    <button type="submit" className="w-full py-3 bg-[#765a17] text-white font-bold rounded-lg hover:bg-[#5b4300] transition-colors mt-6">
                      {editingProductId ? 'Uložit změny' : 'Vložit produkt do nabídky'}
                    </button>

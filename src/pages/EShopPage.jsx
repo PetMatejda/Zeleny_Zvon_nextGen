@@ -37,35 +37,40 @@ export default function EShopPage() {
 
   const ProductCard = ({ product }) => (
     <div className="group flex flex-col justify-between h-full">
-      <div className="relative overflow-hidden rounded-xl bg-surface-container-low mb-4 aspect-[4/5] cursor-pointer">
-        <div className="block h-full w-full bg-surface-container-high/30">
-          <img 
-            alt={product.name} 
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-            src={product.image || 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&q=80&w=600'} 
-            onError={(e) => e.target.src = 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&q=80&w=600'}
-          />
+      <Link to={`/eshop/${product.slug || product.id}`} className="block">
+        <div className="relative overflow-hidden rounded-xl bg-surface-container-low mb-4 aspect-[4/5] cursor-pointer">
+          <div className="block h-full w-full bg-surface-container-high/30">
+            <img 
+              alt={product.name} 
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+              src={product.image || 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&q=80&w=600'} 
+              onError={(e) => e.target.src = 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&q=80&w=600'}
+            />
+          </div>
+          {product.is_hero === 1 && (
+            <span className="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#765a17] text-white">
+              Doporučujeme
+            </span>
+          )}
+          <div
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              addToCart(product);
+            }}
+            className="absolute bottom-4 right-4 bg-surface-container-lowest/90 backdrop-blur-md p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:scale-110 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-primary-container">shopping_bag</span>
+          </div>
         </div>
-        {product.is_hero === 1 && (
-          <span className="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#765a17] text-white">
-            Doporučujeme
-          </span>
-        )}
-        <button 
-          onClick={(e) => {
-            e.stopPropagation();
-            addToCart(product);
-          }}
-          className="absolute bottom-4 right-4 bg-surface-container-lowest/90 backdrop-blur-md p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:scale-110"
-        >
-          <span className="material-symbols-outlined text-primary-container">shopping_bag</span>
-        </button>
-      </div>
+      </Link>
       <div className="px-2 flex-grow flex flex-col justify-end">
         <p className="text-[10px] uppercase tracking-widest text-[#765a17] dark:text-[#ffdf9f] font-bold mb-1">{product.category}</p>
-        <h3 className="text-lg font-notoserif text-on-surface leading-tight mb-2">
-          {product.name}
-        </h3>
+        <Link to={`/eshop/${product.slug || product.id}`}>
+          <h3 className="text-lg font-notoserif text-on-surface leading-tight mb-2 hover:text-[#765a17] transition-colors">
+            {product.name}
+          </h3>
+        </Link>
         <p className="text-sm opacity-70 mb-4 line-clamp-2">{product.description}</p>
         <div className="flex justify-between items-center mt-auto">
           <span className="text-lg font-semibold">{product.price.toLocaleString('cs-CZ')} Kč</span>

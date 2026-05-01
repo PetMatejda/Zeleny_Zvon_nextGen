@@ -8,6 +8,7 @@ import AboutPage from './pages/AboutPage';
 import CheckoutPage from './pages/CheckoutPage';
 import SuccessPage from './pages/SuccessPage';
 import AdminPage from './pages/AdminPage';
+import ProductDetailPage from './pages/ProductDetailPage';
 import { useCart } from './context/CartContext';
 
 function Navigation() {
@@ -108,6 +109,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/eshop" element={<EShopPage />} />
+          <Route path="/eshop/:slug" element={<ProductDetailPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/about" element={<AboutPage />} />

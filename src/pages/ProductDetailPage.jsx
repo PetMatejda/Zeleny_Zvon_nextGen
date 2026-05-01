@@ -5,58 +5,231 @@ import { useCart } from '../context/CartContext';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export default function ProductDetailPage() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const { addToCart } = useCart();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
+  // ── Načtení produktu dle slugu ──────────────────────────────────────────────
   useEffect(() => {
-    fetch(`${API_URL}/products`)
-      .then(res => res.json())
-      .then(data => {
-        const p = data.find(item => item.id.toString() === id);
-        setProduct(p);
-      })
-      .catch(err => console.error(err));
-  }, [id]);
+    setProduct(null);
+    setNotFound(false);
 
-  if (!product) return <div className="container section-padding">Načítám...</div>;
+    fetch(`${API_URL}/products/by-slug/${encodeURIComponent(slug)}`)
+      .then(res => {
+        if (res.status === 404) { setNotFound(true); return null; }
+        return res.json();
+      })
+      .then(data => { if (data) setProduct(data); })
+      .catch(err => { console.error(err); setNotFound(true); });
+  }, [slug]);
+
+  // ── Dynamické vložení JSON-LD do <head> ────────────────────────────────────
+  useEffect(() => {
+    if (!product) return;
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'product-jsonld';
+    script.text = JSON.stringify({
+      '@context': 'https://schema.org/',
+      '@type': 'DietarySupplement',
+      'name': product.name,
+      'url': `https://www.zelenyzvon.cz/eshop/${product.slug || product.id}`,
+      'image': product.image,
+      'description': product.description,
+      'offers': {
+        '@type': 'Offer',
+        'price': String(product.price),
+        'priceCurrency': 'CZK',
+        'availability': 'https://schema.org/InStock',
+        'url': `https://www.zelenyzvon.cz/eshop/${product.slug || product.id}`,
+      },
+    });
+
+    // Odstraníme předchozí JSON-LD (při navigaci mezi produkty)
+    const existing = document.getElementById('product-jsonld');
+    if (existing) existing.remove();
+
+    document.head.appendChild(script);
+
+    // Cleanup při opuštění stránky
+    return () => {
+      const el = document.getElementById('product-jsonld');
+      if (el) el.remove();
+    };
+  }, [product]);
+
+  // ── Stavy načítání ──────────────────────────────────────────────────────────
+  if (notFound) {
+    return (
+      <div className="max-w-7xl mx-auto px-8 pt-20 pb-32 text-center font-plusjakarta">
+        <span className="material-symbols-outlined text-6xl opacity-30 mb-6 block">search_off</span>
+        <h1 className="text-3xl font-notoserif italic mb-4">Produkt nenalezen</h1>
+        <p className="opacity-60 mb-8">Tento produkt bohužel není v nabídce.</p>
+        <Link to="/eshop" className="btn-primary inline-block">← Zpět do E-Shopu</Link>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="max-w-7xl mx-auto px-8 pt-20 pb-32 text-center font-plusjakarta">
+        <div className="inline-block w-12 h-12 border-4 border-[#765a17]/30 border-t-[#765a17] rounded-full animate-spin mb-6" />
+        <p className="opacity-60 italic">Načítám produkt...</p>
+      </div>
+    );
+  }
+
+  const handleAddToCart = () => {
+    addToCart(product, quantity);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
 
   return (
-    <div>
-      <section className="section-padding">
-        <div className="container grid grid-cols-2" style={{ alignItems: 'center' }}>
-          <div>
-             <div style={{ background: 'var(--surface-container-high)', borderRadius: '1.5rem', paddingBottom: '100%', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--on-surface-variant)' }}>
-                {product.image ? <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : 'Fotografie produktu'}
-              </div>
-            </div>
-          </div>
-          <div style={{ paddingLeft: '2rem' }}>
-            <span className="chip" style={{ marginBottom: '1rem' }}>{product.category}</span>
-            <h1 style={{ fontSize: '3rem', marginBottom: '1rem', fontFamily: 'var(--font-serif)' }}>{product.name}</h1>
-            <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--on-primary-container)', marginBottom: '2rem' }}>{product.price} Kč</p>
-            
-            <p style={{ color: 'var(--on-surface-variant)', fontSize: '1.1rem', marginBottom: '2rem', lineHeight: 1.8 }}>
-              {product.description || "Tento vzácný kousek pro Vaše zdraví a pohodu pochází pouze z přírodních a udržitelných zdrojů. Dokonale zapadá do denní praxe uvědomění a péče o tělo i rozvoj duše."}
-            </p>
+    <main className="max-w-7xl mx-auto px-8 pt-12 pb-32 font-plusjakarta">
 
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '2rem' }}>
-              <div style={{ display: 'flex', background: 'var(--surface-container)', borderRadius: '0.5rem', overflow: 'hidden' }}>
-                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ padding: '0.75rem 1rem', border: 'none', background: 'transparent', cursor: 'pointer' }}>-</button>
-                <div style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center' }}>{quantity}</div>
-                <button onClick={() => setQuantity(q => q + 1)} style={{ padding: '0.75rem 1rem', border: 'none', background: 'transparent', cursor: 'pointer' }}>+</button>
-              </div>
-              <button className="btn-primary" onClick={() => addToCart(product, quantity)} style={{ flex: 1 }}>Přidat do košíku</button>
-            </div>
+      {/* Drobečková navigace */}
+      <nav className="flex items-center gap-2 text-sm opacity-60 mb-10 font-plusjakarta">
+        <Link to="/eshop" className="hover:opacity-100 hover:text-[#765a17] transition-colors">
+          E-shop
+        </Link>
+        <span className="material-symbols-outlined text-base">chevron_right</span>
+        {product.category && (
+          <>
+            <span>{product.category}</span>
+            <span className="material-symbols-outlined text-base">chevron_right</span>
+          </>
+        )}
+        <span className="opacity-100 text-on-surface truncate max-w-[300px]">{product.name}</span>
+      </nav>
 
-            <div style={{ borderTop: '1px solid var(--outline-variant)', paddingTop: '1.5rem', marginTop: '1.5rem' }}>
-              <Link to="/eshop" style={{ color: 'var(--on-surface-variant)', textDecoration: 'underline' }}>&larr; Zpět do E-Shopu</Link>
+      {/* Hlavní obsah — 2 sloupce */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+
+        {/* Levý sloupec — obrázek */}
+        <div className="sticky top-28">
+          <div className="relative rounded-2xl overflow-hidden bg-surface-container-low aspect-square shadow-xl">
+            {product.image ? (
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div
+              className="absolute inset-0 flex items-center justify-center text-on-surface-variant opacity-40"
+              style={{ display: product.image ? 'none' : 'flex' }}
+            >
+              <span className="material-symbols-outlined text-8xl">image_not_supported</span>
             </div>
           </div>
         </div>
-      </section>
-    </div>
+
+        {/* Pravý sloupec — informace */}
+        <div>
+          {product.category && (
+            <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-[#765a17]/10 text-[#765a17] dark:text-[#ffdf9f] mb-4">
+              {product.category}
+            </span>
+          )}
+
+          <h1 className="text-3xl lg:text-4xl font-notoserif italic leading-tight mb-4 text-on-surface">
+            {product.name}
+          </h1>
+
+          <p className="text-3xl font-bold text-[#765a17] dark:text-[#ffdf9f] mb-8">
+            {product.price.toLocaleString('cs-CZ')} Kč
+          </p>
+
+          {product.description && (
+            <div className="prose prose-sm max-w-none mb-8">
+              <p className="text-on-surface-variant leading-relaxed text-base"
+                 dangerouslySetInnerHTML={{ __html: product.description }} />
+            </div>
+          )}
+
+          {/* Výběr množství + košík */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+            <div className="flex items-center bg-surface-container rounded-xl overflow-hidden border border-[#765a17]/20">
+              <button
+                onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                className="px-5 py-4 text-lg font-bold hover:bg-[#765a17]/10 transition-colors"
+              >
+                −
+              </button>
+              <span className="px-6 py-4 text-lg font-semibold min-w-[3rem] text-center">
+                {quantity}
+              </span>
+              <button
+                onClick={() => setQuantity(q => q + 1)}
+                className="px-5 py-4 text-lg font-bold hover:bg-[#765a17]/10 transition-colors"
+              >
+                +
+              </button>
+            </div>
+
+            <button
+              onClick={handleAddToCart}
+              className={`flex-1 flex items-center justify-center gap-3 py-4 px-8 rounded-xl font-bold text-base transition-all duration-300 ${
+                added
+                  ? 'bg-green-600 text-white scale-95'
+                  : 'bg-[#765a17] text-white hover:bg-[#5b4300] hover:shadow-lg hover:scale-[1.02] active:scale-95'
+              }`}
+            >
+              <span className="material-symbols-outlined">
+                {added ? 'check_circle' : 'shopping_cart'}
+              </span>
+              {added ? 'Přidáno do košíku!' : 'Přidat do košíku'}
+            </button>
+          </div>
+
+          {/* Skladová dostupnost */}
+          {product.stock > 0 ? (
+            <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400 mb-8">
+              <span className="material-symbols-outlined text-base">check_circle</span>
+              <span>Skladem — expedice do 2 pracovních dnů</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-sm text-red-600 mb-8">
+              <span className="material-symbols-outlined text-base">cancel</span>
+              <span>Dočasně nedostupné</span>
+            </div>
+          )}
+
+          {/* Výhody */}
+          <div className="border-t border-[#765a17]/10 pt-8 space-y-4">
+            {[
+              { icon: 'local_shipping', text: 'Doprava zdarma při objednávce nad 1 500 Kč' },
+              { icon: 'eco', text: 'Přírodní složení bez umělých přísad' },
+              { icon: 'verified', text: 'Pečlivě vybraný od prověřených výrobců' },
+            ].map(({ icon, text }) => (
+              <div key={icon} className="flex items-center gap-3 text-sm opacity-70">
+                <span className="material-symbols-outlined text-[#765a17] text-base">{icon}</span>
+                <span>{text}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Zpět */}
+          <div className="mt-10">
+            <Link
+              to="/eshop"
+              className="inline-flex items-center gap-2 text-sm opacity-60 hover:opacity-100 hover:text-[#765a17] transition-all"
+            >
+              <span className="material-symbols-outlined text-base">arrow_back</span>
+              Zpět do E-Shopu
+            </Link>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
