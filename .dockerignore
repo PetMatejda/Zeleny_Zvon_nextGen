@@ -1,5 +1,27 @@
+# Buildy a závislosti
 node_modules
+.next
+out
+build
+dist
+
+# Git a dokumentace
 .git
-.env
 .gitignore
+.dockerignore
 README.md
+LICENSE
+
+# Debug logy
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Lokální databáze a nahrané soubory
+database.sqlite
+uploads/
+
+# Tajnosti
+.env
+.env.local
+.env.production.local
