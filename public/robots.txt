@@ -1,0 +1,48 @@
+# robots.txt — zelenyzvon.cz
+
+# ──────────────────────────────────────────
+# Standardní vyhledávače
+# ──────────────────────────────────────────
+User-agent: *
+Allow: /
+
+# ──────────────────────────────────────────
+# AI crawleři — explicitně povoleni
+# ──────────────────────────────────────────
+
+# OpenAI (ChatGPT)
+User-agent: GPTBot
+Allow: /
+
+# Anthropic (Claude)
+User-agent: ClaudeBot
+Allow: /
+
+# Perplexity AI
+User-agent: PerplexityBot
+Allow: /
+
+# Google AI (Gemini, AI Overviews)
+User-agent: Google-Extended
+Allow: /
+
+# Meta AI
+User-agent: FacebookBot
+Allow: /
+
+# Apple (Applebot-Extended)
+User-agent: Applebot-Extended
+Allow: /
+
+# Cohere
+User-agent: cohere-ai
+Allow: /
+
+# Common Crawl (trénování LLM)
+User-agent: CCBot
+Allow: /
+
+# ──────────────────────────────────────────
+# Sitemap
+# ──────────────────────────────────────────
+Sitemap: https://zelenyzvon.cz/sitemap.xml
