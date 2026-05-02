@@ -9,7 +9,7 @@ const nextConfig = {
     ],
   },
   // Required so Next.js can use native Node.js modules (sqlite3, pdfkit) in route handlers
-  serverExternalPackages: ['sqlite3', 'pdfkit'],
+  serverExternalPackages: ['sqlite3', 'pdfkit', '@libsql/client', '@libsql/linux-x64-musl'],
 };
 
 export default nextConfig;

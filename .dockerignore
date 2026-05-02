@@ -22,6 +22,6 @@ database.sqlite
 uploads/
 
 # Tajnosti
-.env
+# .env (odkomentováno, aby byl k dispozici NEXT_PUBLIC_GOOGLE_CLIENT_ID při buildu)
 .env.local
 .env.production.local

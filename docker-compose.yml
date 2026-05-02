@@ -1,0 +1,18 @@
+services:
+  web:
+    build: .
+    container_name: zeleny-zvon-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_PATH=/data/database.sqlite
+    # Načte runtime variables pro backend server
+    env_file:
+      - .env
+    volumes:
+      - zeleny_zvon_data:/data
+    restart: unless-stopped
+
+volumes:
+  zeleny_zvon_data:
