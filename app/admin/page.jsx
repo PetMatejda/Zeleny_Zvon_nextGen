@@ -5,12 +5,14 @@ import { GoogleLogin } from '@react-oauth/google';
 
 export default function AdminPage() {
   const [token, setToken] = useState(null);
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'products', 'coupons'
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'products', 'coupons', 'reservations'
   const [orderFilter, setOrderFilter] = useState('Vše');
   
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [coupons, setCoupons] = useState([]);
+  const [slots, setSlots] = useState([]);
+  const [reservationsList, setReservationsList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mounted, setMounted] = useState(false);
@@ -24,6 +26,10 @@ export default function AdminPage() {
   
   const [newCoupon, setNewCoupon] = useState({
     code: '', discount_type: 'percent', discount_value: '', usage_limit: '', valid_from: '', valid_until: ''
+  });
+
+  const [newSlot, setNewSlot] = useState({
+    title: '', date: '', timeSlot: '', capacity: 1
   });
 
   useEffect(() => {
@@ -64,19 +70,27 @@ export default function AdminPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      let url = `/api/orders`;
-      if (activeTab === 'products') url = `/api/products`;
-      else if (activeTab === 'coupons') url = `/api/coupons`;
-
-      const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
-      if (res.status === 401 || res.status === 403) {
-         handleLogout();
-         return;
+      if (activeTab === 'orders') {
+        const res = await fetch(`/api/orders`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.status === 401 || res.status === 403) return handleLogout();
+        setOrders(await res.json());
+      } else if (activeTab === 'products') {
+        const res = await fetch(`/api/products`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.status === 401 || res.status === 403) return handleLogout();
+        setProducts(await res.json());
+      } else if (activeTab === 'coupons') {
+        const res = await fetch(`/api/coupons`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.status === 401 || res.status === 403) return handleLogout();
+        setCoupons(await res.json());
+      } else if (activeTab === 'reservations') {
+        const [slotsRes, resRes] = await Promise.all([
+            fetch(`/api/slots`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`/api/admin_reservations`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+        if (slotsRes.status === 401 || resRes.status === 401) return handleLogout();
+        setSlots(await slotsRes.json());
+        setReservationsList(await resRes.json());
       }
-      const data = await res.json();
-      if (activeTab === 'orders') setOrders(data);
-      else if (activeTab === 'products') setProducts(data);
-      else if (activeTab === 'coupons') setCoupons(data);
     } catch (e) {
       console.error(e);
     } finally {
@@ -174,6 +188,46 @@ export default function AdminPage() {
     } catch(e) {}
   };
 
+  const saveSlot = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`/api/slots`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(newSlot)
+      });
+      if (res.ok) {
+        setNewSlot({ title: '', date: '', timeSlot: '', capacity: 1 });
+        fetchData();
+      }
+    } catch (e) {
+      alert("Chyba při ukládání termínu");
+    }
+  };
+
+  const deleteSlot = async (id) => {
+    if(!confirm("Opravdu smazat vypsaný termín?")) return;
+    try {
+      const res = await fetch(`/api/slots/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+      if (res.ok) fetchData();
+    } catch(e) {}
+  };
+
+  const updateReservationStatus = async (id, status) => {
+    try {
+      const res = await fetch(`/api/admin_reservations/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) fetchData();
+      else {
+        const d = await res.json();
+        alert(d.error || 'Chyba');
+      }
+    } catch(e) {}
+  };
+
   if (!mounted) return null;
 
   if (!token) {
@@ -211,6 +265,9 @@ export default function AdminPage() {
            </button>
            <button onClick={() => setActiveTab('coupons')} className={`w-full text-left px-6 py-4 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'coupons' ? 'bg-[#765a17] text-white shadow-md' : 'bg-surface-container hover:bg-surface-variant'}`}>
              <span className="material-symbols-outlined">local_activity</span> Slevové kupóny
+           </button>
+           <button onClick={() => setActiveTab('reservations')} className={`w-full text-left px-6 py-4 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'reservations' ? 'bg-[#765a17] text-white shadow-md' : 'bg-surface-container hover:bg-surface-variant'}`}>
+             <span className="material-symbols-outlined">calendar_month</span> Rezervace a termíny
            </button>
         </aside>
 
@@ -333,6 +390,80 @@ export default function AdminPage() {
                              <td className="p-4"><button onClick={() => deleteCoupon(c.id)} className="text-red-600 hover:underline font-bold text-sm">Smazat</button></td>
                            </tr>
                          ))}
+                       </tbody>
+                     </table>
+                   </div>
+                 </div>
+               )}
+
+               {/* RESERVATIONS TAB */}
+               {activeTab === 'reservations' && (
+                 <div className="space-y-8">
+                   {/* Management of Slots */}
+                   <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 shadow-sm">
+                     <h3 className="text-xl font-bold mb-4">Vypsat nový termín</h3>
+                     <form onSubmit={saveSlot} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                       <div><label className="text-sm font-semibold opacity-70">Název události</label><input required placeholder="např. Jóga, Masáž" className="w-full p-2 rounded bg-surface-container border-none" value={newSlot.title} onChange={e=>setNewSlot({...newSlot, title: e.target.value})} /></div>
+                       <div><label className="text-sm font-semibold opacity-70">Datum</label><input required type="date" className="w-full p-2 rounded bg-surface-container border-none" value={newSlot.date} onChange={e=>setNewSlot({...newSlot, date: e.target.value})} /></div>
+                       <div><label className="text-sm font-semibold opacity-70">Čas (např. 16:00)</label><input required type="time" className="w-full p-2 rounded bg-surface-container border-none" value={newSlot.timeSlot} onChange={e=>setNewSlot({...newSlot, timeSlot: e.target.value})} /></div>
+                       <div><label className="text-sm font-semibold opacity-70">Kapacita</label><input required type="number" min="1" className="w-full p-2 rounded bg-surface-container border-none" value={newSlot.capacity} onChange={e=>setNewSlot({...newSlot, capacity: e.target.value})} /></div>
+                       <div className="md:col-span-4 pt-2">
+                         <button type="submit" className="bg-[#765a17] text-white px-6 py-2 rounded-lg font-bold">Vypsat termín</button>
+                       </div>
+                     </form>
+                   </div>
+                   
+                   {/* List of Slots */}
+                   <div className="bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/30 shadow-sm overflow-x-auto">
+                     <table className="w-full text-left">
+                       <thead className="bg-surface-container text-sm uppercase opacity-70">
+                         <tr><th className="p-4 font-semibold">Událost</th><th className="p-4 font-semibold">Datum a čas</th><th className="p-4 font-semibold">Kapacita</th><th className="p-4 font-semibold">Akce</th></tr>
+                       </thead>
+                       <tbody>
+                         {slots.map(s => (
+                           <tr key={s.id} className="border-t border-outline-variant/20">
+                             <td className="p-4 font-bold">{s.title}</td>
+                             <td className="p-4">{new Date(s.date).toLocaleDateString('cs-CZ')} v {s.timeSlot}</td>
+                             <td className="p-4 font-bold">{s.taken} / {s.capacity} obsazeno</td>
+                             <td className="p-4"><button onClick={() => deleteSlot(s.id)} className="text-red-600 hover:underline font-bold text-sm">Smazat</button></td>
+                           </tr>
+                         ))}
+                         {slots.length === 0 && <tr><td colSpan="4" className="p-4 text-center opacity-60">Žádné vypsané termíny.</td></tr>}
+                       </tbody>
+                     </table>
+                   </div>
+
+                   <h3 className="text-2xl font-headline italic mt-8 mb-4">Seznam rezervací</h3>
+                   <div className="bg-surface-container-low rounded-xl overflow-hidden border border-outline-variant/30 shadow-sm overflow-x-auto">
+                     <table className="w-full text-left">
+                       <thead className="bg-surface-container text-sm uppercase opacity-70">
+                         <tr><th className="p-4 font-semibold">Zákazník</th><th className="p-4 font-semibold">Událost</th><th className="p-4 font-semibold">Termín</th><th className="p-4 font-semibold">Status</th><th className="p-4 font-semibold">Akce</th></tr>
+                       </thead>
+                       <tbody>
+                         {reservationsList.map(r => (
+                           <tr key={r.id} className="border-t border-outline-variant/20 hover:bg-surface-container/50">
+                             <td className="p-4"><div className="font-bold">{r.name}</div><div className="text-xs opacity-60">{r.email}</div></td>
+                             <td className="p-4 font-bold">{r.slotTitle || 'Neznámá/Stará událost'}</td>
+                             <td className="p-4">{new Date(r.date).toLocaleDateString('cs-CZ')} v {r.timeSlot}</td>
+                             <td className="p-4">
+                               <span className={`text-sm px-3 py-1 rounded-full font-bold ${r.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : r.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                 {r.status === 'pending' ? 'Čeká na schválení' : r.status === 'confirmed' ? 'Potvrzeno' : 'Zrušeno'}
+                               </span>
+                             </td>
+                             <td className="p-4 flex gap-2">
+                               {r.status === 'pending' && (
+                                 <>
+                                   <button onClick={() => updateReservationStatus(r.id, 'confirmed')} className="text-green-700 hover:underline font-bold text-sm">Schválit</button>
+                                   <button onClick={() => updateReservationStatus(r.id, 'cancelled')} className="text-red-600 hover:underline font-bold text-sm">Zamítnout</button>
+                                 </>
+                               )}
+                               {r.status === 'confirmed' && (
+                                   <button onClick={() => updateReservationStatus(r.id, 'cancelled')} className="text-red-600 hover:underline font-bold text-sm">Zrušit</button>
+                               )}
+                             </td>
+                           </tr>
+                         ))}
+                         {reservationsList.length === 0 && <tr><td colSpan="5" className="p-4 text-center opacity-60">Zatím žádné rezervace.</td></tr>}
                        </tbody>
                      </table>
                    </div>

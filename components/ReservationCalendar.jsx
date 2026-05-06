@@ -39,18 +39,16 @@ export default function ReservationCalendar() {
     setSubmitting(true);
     setMessage(null);
 
-    const dateStr = format(selectedDate, 'yyyy-MM-dd');
     const result = await requestBooking({
       name: formData.name,
       email: formData.email,
-      date: dateStr,
-      timeSlot: selectedSlot
+      slotId: selectedSlot.id
     });
 
     setSubmitting(false);
 
     if (result.success) {
-      setMessage({ type: 'success', text: 'Rezervace úspěšně odeslána ke schválení.' });
+      setMessage({ type: 'success', text: 'Rezervace úspěšně odeslána ke schválení. Budete informováni e-mailem.' });
       setFormData({ name: '', email: '' });
       setSelectedSlot(null);
       setSelectedDate(null);
@@ -82,7 +80,7 @@ export default function ReservationCalendar() {
 
       {/* Slots & Form Section */}
       <div className="flex-1 flex flex-col">
-        <h2 className="text-2xl font-semibold mb-4 text-gray-800">2. Čas a údaje</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-gray-800">2. Termín a údaje</h2>
         
         {!selectedDate ? (
           <p className="text-gray-500 italic">Nejprve vyberte datum v kalendáři.</p>
@@ -90,27 +88,35 @@ export default function ReservationCalendar() {
           <div className="flex flex-col gap-6">
             {/* Slots */}
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Dostupné časy pro {format(selectedDate, 'd. MMMM yyyy', { locale: cs })}:</h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Dostupné termíny pro {format(selectedDate, 'd. MMMM yyyy', { locale: cs })}:</h3>
               {loadingSlots ? (
                 <div className="animate-pulse flex gap-2 flex-wrap">
-                  {[1,2,3].map(i => <div key={i} className="h-10 w-20 bg-gray-200 rounded-lg"></div>)}
+                  {[1,2].map(i => <div key={i} className="h-16 w-full bg-gray-200 rounded-lg"></div>)}
                 </div>
               ) : availableSlots.length === 0 ? (
                 <p className="text-red-500 font-medium">Pro tento den už nejsou žádné volné termíny.</p>
               ) : (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col gap-3">
                   {availableSlots.map(slot => (
                     <button
-                      key={slot}
+                      key={slot.id}
                       type="button"
                       onClick={() => setSelectedSlot(slot)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                        selectedSlot === slot 
-                          ? 'bg-green-600 text-white shadow-md scale-105' 
-                          : 'bg-green-50 text-green-700 hover:bg-green-100'
+                      className={`p-4 rounded-xl text-left border-2 transition-all duration-200 ${
+                        selectedSlot?.id === slot.id 
+                          ? 'border-green-600 bg-green-50 shadow-md ring-1 ring-green-600' 
+                          : 'border-gray-200 hover:border-green-300 bg-white'
                       }`}
                     >
-                      {slot}
+                      <div className="flex justify-between items-center">
+                        <div>
+                            <div className="font-bold text-gray-900">{slot.title}</div>
+                            <div className="text-sm text-gray-600">{slot.timeSlot}</div>
+                        </div>
+                        <div className="text-xs font-semibold px-2 py-1 bg-green-100 text-green-800 rounded-full">
+                            {slot.availableSpots} volných míst
+                        </div>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -120,6 +126,9 @@ export default function ReservationCalendar() {
             {/* Form */}
             {selectedSlot && (
               <form onSubmit={handleSubmit} className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4">
+                <div className="p-3 bg-blue-50 text-blue-800 text-xs rounded-lg">
+                    Vybráno: <strong>{selectedSlot.title}</strong> v <strong>{selectedSlot.timeSlot}</strong>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Jméno a příjmení</label>
                   <input
