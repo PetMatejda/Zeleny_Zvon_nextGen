@@ -57,6 +57,41 @@ export async function getAvailableSlots(dateStr) {
   }
 }
 
+export async function getFutureAvailableSlots() {
+  try {
+    const nowStr = new Date().toISOString().split('T')[0];
+    
+    const slots = await db.select().from(reservation_slots).where(sql`${reservation_slots.date} >= ${nowStr}`);
+    
+    const availableSlots = [];
+    for (const slot of slots) {
+      const activeReservations = await db.select().from(reservations).where(
+        and(
+          eq(reservations.slotId, slot.id),
+          sql`${reservations.status} IN ('pending', 'confirmed')`
+        )
+      );
+      
+      const takenCount = activeReservations.length;
+      if (takenCount < slot.capacity) {
+        availableSlots.push({
+          ...slot,
+          availableSpots: slot.capacity - takenCount
+        });
+      }
+    }
+
+    return availableSlots.sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.timeSlot}`);
+      const dateB = new Date(`${b.date}T${b.timeSlot}`);
+      return dateA - dateB;
+    });
+  } catch (err) {
+    console.error('Error fetching future available slots:', err);
+    return []; 
+  }
+}
+
 export async function requestBooking(data) {
   try {
     const { name, email, slotId } = data;

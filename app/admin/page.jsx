@@ -30,7 +30,7 @@ export default function AdminPage() {
   });
 
   const [newSlot, setNewSlot] = useState({
-    title: '', date: '', timeSlot: '', capacity: 1
+    title: '', date: '', timeSlot: '', capacity: 1, repeatFrequency: 'none', repeatCount: 1
   });
 
   useEffect(() => {
@@ -203,7 +203,7 @@ export default function AdminPage() {
         body: JSON.stringify(newSlot)
       });
       if (res.ok) {
-        setNewSlot({ title: '', date: '', timeSlot: '', capacity: 1 });
+        setNewSlot({ title: '', date: '', timeSlot: '', capacity: 1, repeatFrequency: 'none', repeatCount: 1 });
         fetchData();
       }
     } catch (e) {
@@ -439,13 +439,21 @@ export default function AdminPage() {
                    {/* Management of Slots */}
                    <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 shadow-sm">
                      <h3 className="text-xl font-bold mb-4">Vypsat nový termín</h3>
-                     <form onSubmit={saveSlot} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                       <div><label className="text-sm font-semibold opacity-70">Název události</label><input required placeholder="např. Jóga, Masáž" className="w-full p-2 rounded bg-surface-container border-none" value={newSlot.title} onChange={e=>setNewSlot({...newSlot, title: e.target.value})} /></div>
+                     <form onSubmit={saveSlot} className="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
+                       <div className="md:col-span-2"><label className="text-sm font-semibold opacity-70">Název události</label><input required placeholder="např. Jóga, Masáž" className="w-full p-2 rounded bg-surface-container border-none" value={newSlot.title} onChange={e=>setNewSlot({...newSlot, title: e.target.value})} /></div>
                        <div><label className="text-sm font-semibold opacity-70">Datum</label><input required type="date" className="w-full p-2 rounded bg-surface-container border-none" value={newSlot.date} onChange={e=>setNewSlot({...newSlot, date: e.target.value})} /></div>
                        <div><label className="text-sm font-semibold opacity-70">Čas (např. 16:00)</label><input required type="time" className="w-full p-2 rounded bg-surface-container border-none" value={newSlot.timeSlot} onChange={e=>setNewSlot({...newSlot, timeSlot: e.target.value})} /></div>
-                       <div><label className="text-sm font-semibold opacity-70">Kapacita</label><input required type="number" min="1" className="w-full p-2 rounded bg-surface-container border-none" value={newSlot.capacity} onChange={e=>setNewSlot({...newSlot, capacity: e.target.value})} /></div>
-                       <div className="md:col-span-4 pt-2">
-                         <button type="submit" className="bg-[#765a17] text-white px-6 py-2 rounded-lg font-bold">Vypsat termín</button>
+                       <div className="md:col-span-2"><label className="text-sm font-semibold opacity-70">Kapacita</label><input required type="number" min="1" className="w-full p-2 rounded bg-surface-container border-none" value={newSlot.capacity} onChange={e=>setNewSlot({...newSlot, capacity: e.target.value})} /></div>
+                       
+                       <div className="md:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                         <div><label className="text-sm font-semibold opacity-70">Opakování</label><select className="w-full p-2 rounded bg-surface-container border-none" value={newSlot.repeatFrequency} onChange={e=>setNewSlot({...newSlot, repeatFrequency: e.target.value})}><option value="none">Bez opakování</option><option value="daily">Denně</option><option value="weekly">Týdně</option><option value="biweekly">Jednou za 14 dní</option><option value="monthly">Měsíčně</option></select></div>
+                         {newSlot.repeatFrequency !== 'none' && (
+                            <div><label className="text-sm font-semibold opacity-70">Kolikrát zopakovat (včetně prvního)</label><input required type="number" min="1" max="52" className="w-full p-2 rounded bg-surface-container border-none" value={newSlot.repeatCount} onChange={e=>setNewSlot({...newSlot, repeatCount: e.target.value})} /></div>
+                         )}
+                       </div>
+
+                       <div className="md:col-span-6 pt-2">
+                         <button type="submit" className="bg-[#765a17] text-white px-6 py-2 rounded-lg font-bold">Vypsat termín(y)</button>
                        </div>
                      </form>
                    </div>

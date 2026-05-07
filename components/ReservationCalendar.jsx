@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { DayPicker } from 'react-day-picker';
 import { format } from 'date-fns';
 import { cs } from 'date-fns/locale';
-import { getAvailableSlots, requestBooking } from '../app/actions/reservations';
+import { getAvailableSlots, requestBooking, getFutureAvailableSlots } from '../app/actions/reservations';
 import 'react-day-picker/dist/style.css';
 
 export default function ReservationCalendar() {
@@ -18,6 +18,16 @@ export default function ReservationCalendar() {
   const [formData, setFormData] = useState({ name: '', email: '' });
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
+
+  const [futureSlots, setFutureSlots] = useState([]);
+  const [availableDates, setAvailableDates] = useState([]);
+
+  useEffect(() => {
+    getFutureAvailableSlots().then(slots => {
+      setFutureSlots(slots);
+      setAvailableDates(slots.map(s => new Date(s.date)));
+    });
+  }, []);
 
   useEffect(() => {
     if (selectedDate) {
@@ -76,12 +86,37 @@ export default function ReservationCalendar() {
             locale={cs}
             disabled={[{ before: new Date() }]}
             className="font-sans"
+            modifiers={{ available: availableDates }}
             modifiersClassNames={{
-              selected: 'bg-green-600 text-white rounded-full',
-              today: 'text-green-600 font-bold'
+              selected: 'bg-green-600 text-white rounded-full hover:bg-green-700',
+              today: 'text-green-600 font-bold',
+              available: 'bg-green-50 text-green-900 font-medium rounded-full'
             }}
           />
         </div>
+
+        {futureSlots.length > 0 && (
+          <div className="mt-8">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wider">Nejbližší volné termíny</h3>
+            <div className="flex flex-col gap-2">
+              {futureSlots.slice(0, 3).map(slot => (
+                <button
+                  key={`nearest-${slot.id}`}
+                  onClick={() => setSelectedDate(new Date(slot.date))}
+                  className="text-left text-sm p-3 rounded-xl border border-gray-100 hover:border-green-300 bg-white hover:bg-green-50 transition-all flex justify-between items-center group shadow-sm"
+                >
+                  <div>
+                    <div className="font-semibold text-gray-800">{format(new Date(slot.date), 'd. MMMM', { locale: cs })}</div>
+                    <div className="text-xs text-gray-500">{slot.timeSlot} - {slot.title}</div>
+                  </div>
+                  <div className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full opacity-70 group-hover:opacity-100 transition-opacity">
+                    {slot.availableSpots} míst
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Slots & Form Section */}
