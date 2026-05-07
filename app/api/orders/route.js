@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '../../../lib/db.js';
+import { db } from '../../../lib/db-drizzle.js';
+import { orders, order_items, coupons, products } from '../../../lib/schema.js';
 import { authenticateToken } from '../../../lib/auth.js';
+import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import qrcode from 'qrcode';
 import { sendEmail } from '../../../lib/email.js';
 import PDFDocument from 'pdfkit';
@@ -8,98 +10,102 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const FONTS_DIR = join(__dirname, '../../../../fonts');
+const FONTS_DIR = join(process.cwd(), 'fonts');
 
 // GET /api/orders — list all (auth required)
 export async function GET(request) {
   const { error } = authenticateToken(request);
   if (error) return error;
 
-  const db = getDb();
-  return new Promise((resolve) => {
-    db.all('SELECT * FROM orders ORDER BY createdAt DESC', [], (err, rows) => {
-      if (err) return resolve(NextResponse.json({ error: err.message }, { status: 500 }));
-      resolve(NextResponse.json(rows));
-    });
-  });
+  try {
+    const allOrders = await db.select().from(orders).orderBy(desc(orders.createdAt));
+    return NextResponse.json(allOrders);
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
 
 // POST /api/orders — create order
 export async function POST(request) {
-  const db = getDb();
-  const { customerName, email, address, totalAmount, items, couponCode } = await request.json();
+  try {
+    const { customerName, email, address, totalAmount, items, couponCode } = await request.json();
 
-  return new Promise((resolve) => {
-    db.serialize(() => {
-      db.run('BEGIN TRANSACTION');
-
-      const finalizeOrder = (cId, fAmount) => {
-        db.run(
-          'INSERT INTO orders (customerName, email, address, totalAmount, coupon_id) VALUES (?, ?, ?, ?, ?)',
-          [customerName, email, address || '', fAmount, cId],
-          async function (err) {
-            if (err) {
-              db.run('ROLLBACK');
-              return resolve(NextResponse.json({ error: err.message }, { status: 500 }));
-            }
-            const orderId = this.lastID;
-
-            const stmt = db.prepare('INSERT INTO order_items (orderId, productId, quantity) VALUES (?, ?, ?)');
-            items.forEach(item => stmt.run(orderId, item.productId, item.quantity));
-            stmt.finalize();
-
-            if (cId) db.run('UPDATE coupons SET times_used = times_used + 1 WHERE id = ?', [cId]);
-            db.run('COMMIT');
-
-            // Generate SPAYD QR code
-            const formattedAmount = Number(fAmount).toFixed(2);
-            const spaydStr = `SPD*1.0*ACC:CZ5108000000001570560063*AM:${formattedAmount}*CC:CZK*X-VS:${orderId}*MSG:Objednavka%20${orderId}%20Zeleny%20Zvon`;
-            const qrCodeDataUrl = await qrcode.toDataURL(spaydStr, { margin: 2, scale: 5 });
-
-            resolve(NextResponse.json({ id: orderId, status: 'Nová', totalAmount: fAmount, qrCode: qrCodeDataUrl }));
-
-            // Async: generate invoice & send email (non-blocking)
-            setTimeout(() => generateAndSendInvoice(orderId, customerName, email, address, fAmount, items, qrCodeDataUrl), 50);
-          }
-        );
-      };
+    const orderResult = await db.transaction(async (tx) => {
+      let finalAmount = Number(totalAmount);
+      let couponId = null;
 
       if (couponCode) {
-        db.get('SELECT id, discount_type, discount_value FROM coupons WHERE code = ? AND is_active = 1', [couponCode], (err, row) => {
-          if (row) {
-            let finalAmount = row.discount_type === 'percent'
-              ? totalAmount * (1 - row.discount_value / 100)
-              : totalAmount - row.discount_value;
-            if (finalAmount < 0) finalAmount = 0;
-            finalizeOrder(row.id, Math.round(finalAmount));
-          } else {
-            finalizeOrder(null, Math.round(totalAmount));
-          }
-        });
-      } else {
-        finalizeOrder(null, Math.round(totalAmount));
+        const [coupon] = await tx.select().from(coupons).where(and(eq(coupons.code, couponCode), eq(coupons.is_active, true)));
+        if (coupon) {
+          couponId = coupon.id;
+          finalAmount = coupon.discount_type === 'percent'
+            ? finalAmount * (1 - coupon.discount_value / 100)
+            : finalAmount - coupon.discount_value;
+          if (finalAmount < 0) finalAmount = 0;
+          
+          await tx.update(coupons)
+            .set({ times_used: sql`${coupons.times_used} + 1` })
+            .where(eq(coupons.id, couponId));
+        }
       }
+
+      finalAmount = Math.round(finalAmount);
+
+      const [newOrder] = await tx.insert(orders).values({
+        customerName,
+        email,
+        address: address || '',
+        totalAmount: finalAmount,
+        coupon_id: couponId
+      }).returning();
+
+      if (items && items.length > 0) {
+        const orderItemsToInsert = items.map(item => ({
+          orderId: newOrder.id,
+          productId: item.productId,
+          quantity: item.quantity
+        }));
+        await tx.insert(order_items).values(orderItemsToInsert);
+      }
+
+      return newOrder;
     });
-  });
+
+    // Generate SPAYD QR code
+    const formattedAmount = Number(orderResult.totalAmount).toFixed(2);
+    const spaydStr = `SPD*1.0*ACC:CZ5108000000001570560063*AM:${formattedAmount}*CC:CZK*X-VS:${orderResult.id}*MSG:Objednavka%20${orderResult.id}%20Zeleny%20Zvon`;
+    const qrCodeDataUrl = await qrcode.toDataURL(spaydStr, { margin: 2, scale: 5 });
+
+    // Async: generate invoice & send email (non-blocking)
+    setTimeout(() => generateAndSendInvoice(orderResult.id, customerName, email, address, orderResult.totalAmount, items, qrCodeDataUrl), 50);
+
+    return NextResponse.json({ 
+      id: orderResult.id, 
+      status: 'Nová', 
+      totalAmount: orderResult.totalAmount, 
+      qrCode: qrCodeDataUrl 
+    });
+
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
 
 async function generateAndSendInvoice(orderId, name, email, address, amount, items, qrCodeDataUrl) {
-  const db = getDb();
   try {
-    const itemDetails = await new Promise((resolve, reject) => {
-      const productIds = items.map(i => i.productId).join(',');
-      if (!productIds) return resolve([]);
-      db.all(`SELECT id, name, price FROM products WHERE id IN (${productIds})`, (err, rows) => {
-        if (err) reject(err);
-        else {
-          const enrichedItems = items.map(item => {
-            const product = rows.find(r => r.id === item.productId);
-            return { ...item, name: product ? product.name : 'Neznámý produkt', price: product ? product.price : 0 };
-          });
-          resolve(enrichedItems);
-        }
+    const productIds = items.map(i => i.productId);
+    let itemDetails = [];
+    
+    if (productIds.length > 0) {
+      const productsData = await db.select({ id: products.id, name: products.name, price: products.price })
+        .from(products)
+        .where(inArray(products.id, productIds));
+        
+      itemDetails = items.map(item => {
+        const product = productsData.find(r => r.id === item.productId);
+        return { ...item, name: product ? product.name : 'Neznámý produkt', price: product ? product.price : 0 };
       });
-    });
+    }
 
     const doc = new PDFDocument({ margin: 50 });
     doc.registerFont('Roboto', join(FONTS_DIR, 'Roboto-Regular.ttf'));

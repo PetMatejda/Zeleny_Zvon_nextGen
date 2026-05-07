@@ -1,26 +1,30 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '../../../../../lib/db.js';
+import { db } from '../../../../../lib/db-drizzle.js';
+import { order_items, products } from '../../../../../lib/schema.js';
 import { authenticateToken } from '../../../../../lib/auth.js';
+import { eq } from 'drizzle-orm';
 
 // GET /api/orders/[id]/items
 export async function GET(request, { params }) {
   const { error } = authenticateToken(request);
   if (error) return error;
 
-  const db = getDb();
-  const { id } = await params;
+  try {
+    const { id } = await params;
 
-  return new Promise((resolve) => {
-    db.all(
-      `SELECT oi.id, oi.quantity, p.name, p.price, p.image
-       FROM order_items oi
-       JOIN products p ON oi.productId = p.id
-       WHERE oi.orderId = ?`,
-      [id],
-      (err, rows) => {
-        if (err) return resolve(NextResponse.json({ error: err.message }, { status: 500 }));
-        resolve(NextResponse.json(rows));
-      }
-    );
-  });
+    const rows = await db.select({
+      id: order_items.id,
+      quantity: order_items.quantity,
+      name: products.name,
+      price: products.price,
+      image: products.image
+    })
+    .from(order_items)
+    .innerJoin(products, eq(order_items.productId, products.id))
+    .where(eq(order_items.orderId, id));
+
+    return NextResponse.json(rows);
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }

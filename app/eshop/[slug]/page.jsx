@@ -1,15 +1,18 @@
 export const dynamic = 'force-dynamic';
-import { getDb } from '../../../lib/db.js';
+import { db } from '../../../lib/db-drizzle.js';
+import { products } from '../../../lib/schema.js';
+import { eq } from 'drizzle-orm';
 import ProductDetailClient from './ProductDetailClient';
 import { notFound } from 'next/navigation';
 
 async function getProduct(slug) {
-  return new Promise((resolve) => {
-    const db = getDb();
-    db.get('SELECT * FROM products WHERE slug = ?', [slug], (err, row) => {
-      resolve(row || null);
-    });
-  });
+  try {
+    const [product] = await db.select().from(products).where(eq(products.slug, slug));
+    return product || null;
+  } catch (err) {
+    console.error('Error fetching product:', err);
+    return null;
+  }
 }
 
 // generateMetadata — sets <title>, <meta description> and Open Graph server-side

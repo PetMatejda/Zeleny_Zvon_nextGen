@@ -7,5 +7,4 @@ export default defineConfig({
   dbCredentials: {
     url: 'file:./database.sqlite',
   },
-  tablesFilter: ['reservations'],
 });

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '../../../lib/db.js';
+import { db } from '../../../lib/db-drizzle.js';
+import { products } from '../../../lib/schema.js';
 import { authenticateToken } from '../../../lib/auth.js';
 
 function slugify(name) {
@@ -10,13 +11,12 @@ function slugify(name) {
 
 // GET /api/products — list all
 export async function GET() {
-  const db = getDb();
-  return new Promise((resolve) => {
-    db.all('SELECT * FROM products', [], (err, rows) => {
-      if (err) return resolve(NextResponse.json({ error: err.message }, { status: 500 }));
-      resolve(NextResponse.json(rows));
-    });
-  });
+  try {
+    const allProducts = await db.select().from(products);
+    return NextResponse.json(allProducts);
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
 
 // POST /api/products — create product (auth required)
@@ -24,20 +24,25 @@ export async function POST(request) {
   const { error } = authenticateToken(request);
   if (error) return error;
 
-  const db = getDb();
-  const { name, price, category, description, image, stock, is_hero, slug } = await request.json();
-  const isHeroVal = is_hero ? 1 : 0;
-  const stockVal = stock || 0;
-  const slugVal = slug || slugify(name);
+  try {
+    const { name, price, category, description, image, stock, is_hero, slug } = await request.json();
+    const isHeroVal = is_hero ? true : false;
+    const stockVal = stock || 0;
+    const slugVal = slug || slugify(name);
 
-  return new Promise((resolve) => {
-    db.run(
-      'INSERT INTO products (name, price, category, description, image, stock, is_hero, slug) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [name, price, category, description, image, stockVal, isHeroVal, slugVal],
-      function (err) {
-        if (err) return resolve(NextResponse.json({ error: err.message }, { status: 500 }));
-        resolve(NextResponse.json({ id: this.lastID, name, price, category, description, image, stock: stockVal, is_hero: isHeroVal, slug: slugVal }));
-      }
-    );
-  });
+    const result = await db.insert(products).values({
+      name,
+      price,
+      category,
+      description,
+      image,
+      stock: stockVal,
+      is_hero: isHeroVal,
+      slug: slugVal
+    }).returning();
+
+    return NextResponse.json(result[0]);
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }

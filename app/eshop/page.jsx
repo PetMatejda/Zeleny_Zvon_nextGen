@@ -1,4 +1,5 @@
-import { getDb } from '../../lib/db.js';
+import { db } from '../../lib/db-drizzle.js';
+import { products } from '../../lib/schema.js';
 import EShopClient from './EShopClient';
 
 export const dynamic = 'force-dynamic';
@@ -10,14 +11,13 @@ export const metadata = {
 
 // Fetch products server-side so bots see them
 async function getProducts() {
-  return new Promise((resolve) => {
-    const db = getDb();
-    db.all('SELECT * FROM products', [], (err, rows) => {
-      console.log('GET_PRODUCTS_ESHOP_PAGE - ERROR:', err);
-      console.log('GET_PRODUCTS_ESHOP_PAGE - COUNT:', rows ? rows.length : 0);
-      resolve(err ? [] : rows);
-    });
-  });
+  try {
+    const allProducts = await db.select().from(products);
+    return allProducts;
+  } catch (err) {
+    console.error('GET_PRODUCTS_ESHOP_PAGE - ERROR:', err);
+    return [];
+  }
 }
 
 export default async function EShopPage() {
