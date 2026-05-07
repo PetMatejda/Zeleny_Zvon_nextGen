@@ -4,18 +4,7 @@ import { db } from '../../lib/db-drizzle.js';
 import { reservations, reservation_slots } from '../../lib/schema.js';
 import { eq, and, sql } from 'drizzle-orm';
 import { google } from 'googleapis';
-import nodemailer from 'nodemailer';
-
-// Email configuration
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'localhost',
-  port: process.env.SMTP_PORT || 1025,
-  secure: false, // true for 465, false for other ports
-  auth: process.env.SMTP_USER ? {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  } : undefined,
-});
+import { sendEmail } from '../../lib/email.js';
 
 // Google Calendar setup
 function getCalendarClient() {
@@ -104,12 +93,12 @@ export async function requestBooking(data) {
     });
 
     // Notify Admin
-    const adminEmail = process.env.SMTP_USER || 'admin@zelenyzvon.cz'; 
-    await transporter.sendMail({
-      from: `"Zelený Zvon Rezervace" <${adminEmail}>`,
+    const adminEmail = process.env.SMTP_USER || 'admin@zelenyzvon.cz';
+    const textMsg = `Nová rezervace od ${name} (${email}) na termín ${slot.title} (${slot.date} v ${slot.timeSlot}). Prosím, schvalte ji v administraci.`;
+    await sendEmail({
       to: adminEmail,
       subject: `Nová žádost o rezervaci - ${name}`,
-      text: `Nová rezervace od ${name} (${email}) na termín ${slot.title} (${slot.date} v ${slot.timeSlot}). Prosím, schvalte ji v administraci.`,
+      htmlContent: `<p>${textMsg.replace(/\n/g, '<br/>')}</p>`,
     }).catch(console.error);
 
     return { success: true };
@@ -162,12 +151,11 @@ export async function approveBooking(id) {
     }
 
     // Send confirmation email to user
-    const adminEmail = process.env.SMTP_USER || 'admin@zelenyzvon.cz';
-    await transporter.sendMail({
-      from: `"Zelený Zvon" <${adminEmail}>`,
+    const textMsg = `Dobrý den ${reservation.name},\n\nVaše rezervace na událost "${slot ? slot.title : 'Rezervace'}" dne ${reservation.date} v ${reservation.timeSlot} byla úspěšně potvrzena.\n\nTěšíme se na Vás!`;
+    await sendEmail({
       to: reservation.email,
       subject: `Potvrzení rezervace - Zelený Zvon`,
-      text: `Dobrý den ${reservation.name},\n\nVaše rezervace na událost "${slot ? slot.title : 'Rezervace'}" dne ${reservation.date} v ${reservation.timeSlot} byla úspěšně potvrzena.\n\nTěšíme se na Vás!`,
+      htmlContent: `<p>${textMsg.replace(/\n/g, '<br/>')}</p>`,
     }).catch(console.error);
 
     return { success: true };
@@ -177,9 +165,60 @@ export async function approveBooking(id) {
   }
 }
 
-export async function rejectBooking(id) {
+export async function rejectBooking(id, sendEmailFlag = true, customMessage = null, reason = null) {
   try {
+    const [reservation] = await db.select().from(reservations).where(eq(reservations.id, id));
+    if (!reservation) return { success: false, error: 'Rezervace nenalezena.' };
+
+    const wasConfirmed = reservation.status === 'confirmed';
+
     await db.update(reservations).set({ status: 'cancelled' }).where(eq(reservations.id, id));
+
+    if (wasConfirmed) {
+      const calendar = getCalendarClient();
+      const calendarId = process.env.GOOGLE_CALENDAR_ID;
+      if (calendar && calendarId) {
+        try {
+          const [slot] = await db.select().from(reservation_slots).where(eq(reservation_slots.id, reservation.slotId));
+          const dateStr = slot ? slot.date : reservation.date;
+          
+          const events = await calendar.events.list({
+            calendarId,
+            q: reservation.email,
+            timeMin: new Date(new Date(dateStr).getTime() - 24 * 3600 * 1000).toISOString(),
+            timeMax: new Date(new Date(dateStr).getTime() + 2 * 24 * 3600 * 1000).toISOString(),
+          });
+
+          if (events.data.items) {
+            for (const ev of events.data.items) {
+               if (ev.start && ev.start.dateTime && ev.start.dateTime.startsWith(dateStr)) {
+                  await calendar.events.delete({
+                      calendarId,
+                      eventId: ev.id,
+                  });
+               }
+            }
+          }
+        } catch (calErr) {
+          console.error('Nepodařilo se smazat událost z kalendáře:', calErr);
+        }
+      }
+    }
+
+    if (sendEmailFlag && reservation.email) {
+      let message = customMessage || `Dobrý den ${reservation.name},\n\nVaše rezervace ze dne ${reservation.date} v ${reservation.timeSlot} byla bohužel zrušena.\n\nOmlouváme se za případné komplikace a děkujeme za pochopení.`;
+      
+      if (reason && !customMessage) {
+        message = `Dobrý den ${reservation.name},\n\nVaše rezervace ze dne ${reservation.date} v ${reservation.timeSlot} byla bohužel zrušena.\n\nDůvod zrušení: ${reason}\n\nOmlouváme se za případné komplikace a děkujeme za pochopení.`;
+      }
+      
+      await sendEmail({
+        to: reservation.email,
+        subject: `Zrušení rezervace - Zelený Zvon`,
+        htmlContent: `<p>${message.replace(/\n/g, '<br/>')}</p>`,
+      }).catch(console.error);
+    }
+
     return { success: true };
   } catch(error) {
     return { success: false, error: 'Chyba při rušení.'};

@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
-
+import { sendEmail } from '../../../lib/email.js';
 export async function POST(request) {
   const { name, email, message } = await request.json();
   if (!name || !email || !message) {
@@ -8,40 +7,37 @@ export async function POST(request) {
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.ethereal.email',
-      port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-    });
+    const htmlContent = `
+      <h2 style="margin-top: 0; color: #558266; font-size: 22px; font-weight: normal; border-bottom: 1px solid #e1ebe4; padding-bottom: 15px;">
+          Nová zpráva z webu
+      </h2>
 
-    if (transporter.options.host === 'smtp.ethereal.email' && !process.env.SMTP_USER) {
-      const testAccount = await nodemailer.createTestAccount();
-      transporter.options.auth = { user: testAccount.user, pass: testAccount.pass };
-    }
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 16px; line-height: 1.6; margin-bottom: 25px; color: #444444;">
+          <tr>
+              <td width="70" style="padding-bottom: 5px; color: #666666;">Jméno:</td>
+              <td style="padding-bottom: 5px;"><strong style="color: #333333;">${name}</strong></td>
+          </tr>
+          <tr>
+              <td style="color: #666666;">E-mail:</td>
+              <td><a href="mailto:${email}" style="color: #558266; text-decoration: none; font-weight: bold;">${email}</a></td>
+          </tr>
+      </table>
 
-    const htmlTemplate = `
-      <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-        <h2 style="color: #765a17;">Nová zpráva z kontaktního formuláře</h2>
-        <p><strong>Napsal:</strong> ${name} (${email})</p>
-        <p><strong>Zpráva:</strong></p>
-        <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #765a17;">
+      <p style="margin: 0 0 10px 0; font-size: 13px; color: #999999; text-transform: uppercase; letter-spacing: 1px;">
+          Znění zprávy:
+      </p>
+
+      <div style="background-color: #f4f7f5; border-left: 4px solid #558266; border-radius: 0 4px 4px 0; padding: 20px; color: #333333; line-height: 1.6; font-size: 15px;">
           ${message.replace(/\n/g, '<br/>')}
-        </div>
       </div>
     `;
 
-    const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"Zelený Zvon" <zelenyzvon@gmail.com>',
+    await sendEmail({
       to: process.env.ADMIN_EMAIL || 'zelenyzvon@gmail.com',
       replyTo: email,
       subject: `Nová zpráva od ${name} - Zelený Zvon`,
-      html: htmlTemplate,
+      htmlContent,
     });
-
-    if (transporter.options.host === 'smtp.ethereal.email') {
-      console.log('Náhled testovací kontaktní zprávy:', nodemailer.getTestMessageUrl(info));
-    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

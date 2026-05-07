@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDb } from '../../../lib/db.js';
 import { authenticateToken } from '../../../lib/auth.js';
 import qrcode from 'qrcode';
-import nodemailer from 'nodemailer';
+import { sendEmail } from '../../../lib/email.js';
 import PDFDocument from 'pdfkit';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -111,65 +111,53 @@ async function generateAndSendInvoice(orderId, name, email, address, amount, ite
       const pdfData = Buffer.concat(buffers);
       console.log(`Faktura vygenerována pro ${email}. Připravuji odeslání e-mailu...`);
       try {
-        const transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST || 'smtp.ethereal.email',
-          port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
-          secure: process.env.SMTP_SECURE === 'true',
-          auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-        });
-
-        if (transporter.options.host === 'smtp.ethereal.email' && !process.env.SMTP_USER) {
-          const testAccount = await nodemailer.createTestAccount();
-          transporter.options.auth = { user: testAccount.user, pass: testAccount.pass };
-        }
-
-        const fromAddress = process.env.SMTP_FROM || '"Zelený Zvon" <zelenyzvon@gmail.com>';
         const qrBase64 = qrCodeDataUrl.replace(/^data:image\/png;base64,/, '');
         const qrBufferEmail = Buffer.from(qrBase64, 'base64');
 
-        const htmlTemplate = `
-          <div style="font-family: Arial, sans-serif; color: #1b1c19; max-width: 600px; margin: 0 auto; border: 1px solid #765a17; border-radius: 10px; overflow: hidden;">
-            <div style="background-color: #765a17; color: #fff; padding: 20px; text-align: center;">
-              <h1 style="margin: 0; font-size: 24px; font-style: italic;">Zelený Zvon</h1>
-            </div>
-            <div style="padding: 30px;">
-              <h2 style="margin-top: 0; color: #1b1c19;">Děkujeme za vaši objednávku!</h2>
-              <p>Vážený/á zákazníku,</p>
-              <p>vaše objednávka číslo <strong>${orderId}</strong> byla úspěšně zpracována. V příloze tohoto e-mailu najdete zálohovou fakturu k proplacení ve formátu PDF.</p>
-              <div style="background-color: #f6f5f1; border-radius: 8px; padding: 20px;">
-                <h3 style="color: #765a17; border-bottom: 2px solid #765a17; padding-bottom: 8px; margin-top: 0;">Výzva k úhradě</h3>
-                <p>Prosíme o laskavou úhradu částky: <strong style="font-size: 18px;">${amount} Kč</strong></p>
-                <ul style="list-style-type: none; padding-left: 0; line-height: 1.8;">
-                  <li>Číslo účtu: <strong>1570560063/0800</strong></li>
-                  <li>Variabilní symbol: <strong>${orderId}</strong></li>
-                </ul>
-              </div>
-              <div style="text-align: center; margin: 30px 0;">
-                <p style="font-size: 14px; color: #666; margin-bottom: 10px;">Pro rychlou a snadnou platbu přes mobilní bankovnictví naskenujte tento QR kód:</p>
-                <img src="cid:qrcode_image" alt="QR Platba" style="width: 200px; height: 200px; display: inline-block; border: 2px solid #765a17; border-radius: 10px; padding: 10px;" />
-              </div>
-            </div>
-            <div style="background-color: #f6f5f1; padding: 15px; text-align: center; font-size: 12px; color: #888;">
-              Zelený Zvon | Zpět k přírodě<br/>Pokud máte jakékoliv dotazy, jednoduše odpovězte na tento e-mail.
-            </div>
+        const htmlContent = `
+          <h2 style="margin-top: 0; color: #558266; font-size: 24px; font-weight: normal;">Děkujeme za vaši objednávku!</h2>
+          <p style="margin-top: 0; margin-bottom: 15px;">Vážený/á zákazníku,</p>
+          <p style="margin-top: 0; margin-bottom: 25px;">vaše objednávka číslo <strong style="color: #333333;">${orderId}</strong> byla úspěšně zpracována. V příloze tohoto e-mailu najdete zálohovou fakturu k proplacení ve formátu PDF.</p>
+
+          <!-- Zvýrazněný blok pro platbu -->
+          <div style="background-color: #f4f7f5; border-left: 4px solid #558266; border-radius: 4px; padding: 25px; margin-bottom: 30px;">
+              <h3 style="color: #558266; border-bottom: 1px solid #dcebdc; padding-bottom: 10px; margin-top: 0; margin-bottom: 15px; font-size: 18px; font-weight: normal;">Výzva k úhradě</h3>
+              
+              <p style="margin-top: 0; margin-bottom: 20px;">Prosíme o laskavou úhradu částky: <strong style="font-size: 20px; color: #333333;">${amount} Kč</strong></p>
+              
+              <!-- Tabulka pro dokonalé zarovnání platebních údajů -->
+              <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 16px; line-height: 1.6; color: #444444;">
+                  <tr>
+                      <td width="140" style="padding-bottom: 8px; color: #666666;">Číslo účtu:</td>
+                      <td style="padding-bottom: 8px;"><strong style="color: #333333; font-size: 17px;">1570560063/0800</strong></td>
+                  </tr>
+                  <tr>
+                      <td style="color: #666666;">Variabilní symbol:</td>
+                      <td><strong style="color: #333333;">${orderId}</strong></td>
+                  </tr>
+              </table>
+          </div>
+
+          <!-- Sekce pro QR kód -->
+          <div style="text-align: center; margin: 30px 0 10px 0; background-color: #ffffff; border: 1px solid #e1ebe4; border-radius: 8px; padding: 25px;">
+              <p style="font-size: 14px; color: #666666; margin-top: 0; margin-bottom: 15px;">
+                  Pro rychlou a snadnou platbu přes mobilní bankovnictví<br>můžete naskenovat tento QR kód:
+              </p>
+              <img src="cid:qrcode_image" alt="QR Platba" width="180" height="180" style="width: 180px; height: 180px; display: inline-block; border: 1px solid #e1ebe4; border-radius: 8px; padding: 10px; background-color: #ffffff;" />
           </div>
         `;
 
-        const info = await transporter.sendMail({
-          from: fromAddress, to: email,
+        await sendEmail({
+          to: email,
           subject: `Zálohová faktura - objednávka č. ${orderId} - Zelený Zvon`,
-          html: htmlTemplate,
+          htmlContent,
           attachments: [
             { filename: `Zalohova_faktura_${orderId}.pdf`, content: pdfData },
             { filename: 'qrcode.png', content: qrBufferEmail, cid: 'qrcode_image' },
           ],
         });
 
-        if (transporter.options.host === 'smtp.ethereal.email') {
-          console.log('Náhled testovacího emailu:', nodemailer.getTestMessageUrl(info));
-        } else {
-          console.log('Email úspěšně odeslán na:', email);
-        }
+        console.log('Email úspěšně odeslán na:', email);
       } catch (err) {
         console.error('Nepodařilo se odeslat e-mail:', err);
       }

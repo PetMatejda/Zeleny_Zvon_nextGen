@@ -9,14 +9,14 @@ export async function PATCH(request, { params }) {
   try {
     const { id } = await params;
     const body = await request.json();
-    const { status } = body; // 'confirmed' or 'cancelled'
+    const { status, reason } = body; // 'confirmed' or 'cancelled'
 
     if (status === 'confirmed') {
         const res = await approveBooking(id);
         if (!res.success) return NextResponse.json({ error: res.error }, { status: 400 });
         return NextResponse.json({ success: true });
     } else if (status === 'cancelled') {
-        const res = await rejectBooking(id);
+        const res = await rejectBooking(id, true, null, reason);
         if (!res.success) return NextResponse.json({ error: res.error }, { status: 400 });
         return NextResponse.json({ success: true });
     }

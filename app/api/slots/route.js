@@ -51,10 +51,33 @@ export async function POST(request) {
 
   try {
     const data = await request.json();
-    const { title, date, timeSlot, capacity } = data;
-    await db.insert(reservation_slots).values({
-      title, date, timeSlot, capacity: parseInt(capacity)
-    });
+    const { title, date, timeSlot, capacity, repeatCount = 1, repeatFrequency = 'none' } = data;
+    
+    let currentDate = new Date(date);
+    const count = parseInt(repeatCount) || 1;
+    const valuesToInsert = [];
+
+    for (let i = 0; i < count; i++) {
+        const formattedDate = currentDate.toISOString().split('T')[0];
+        valuesToInsert.push({
+            title, date: formattedDate, timeSlot, capacity: parseInt(capacity)
+        });
+
+        if (repeatFrequency === 'weekly') {
+            currentDate.setUTCDate(currentDate.getUTCDate() + 7);
+        } else if (repeatFrequency === 'biweekly') {
+            currentDate.setUTCDate(currentDate.getUTCDate() + 14);
+        } else if (repeatFrequency === 'daily') {
+            currentDate.setUTCDate(currentDate.getUTCDate() + 1);
+        } else if (repeatFrequency === 'monthly') {
+            currentDate.setUTCMonth(currentDate.getUTCMonth() + 1);
+        } else {
+            break;
+        }
+    }
+
+    await db.insert(reservation_slots).values(valuesToInsert);
+
     return NextResponse.json({ success: true });
   } catch(e) {
     return NextResponse.json({ error: 'Nepodařilo se vytvořit termín.' }, { status: 500 });

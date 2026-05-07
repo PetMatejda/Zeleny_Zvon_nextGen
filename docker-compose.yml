@@ -13,6 +13,16 @@ services:
     volumes:
       - zeleny_zvon_data:/data
     restart: unless-stopped
+    depends_on:
+      - mailpit
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: zeleny-zvon-mail
+    ports:
+      - "8025:8025" # Web UI
+      - "1025:1025" # SMTP
+    restart: unless-stopped
 
 volumes:
   zeleny_zvon_data:

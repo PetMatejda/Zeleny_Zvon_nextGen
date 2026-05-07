@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { DayPicker } from 'react-day-picker';
 import { format } from 'date-fns';
 import { cs } from 'date-fns/locale';
@@ -8,6 +9,7 @@ import { getAvailableSlots, requestBooking } from '../app/actions/reservations';
 import 'react-day-picker/dist/style.css';
 
 export default function ReservationCalendar() {
+  const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(null);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -48,10 +50,14 @@ export default function ReservationCalendar() {
     setSubmitting(false);
 
     if (result.success) {
-      setMessage({ type: 'success', text: 'Rezervace úspěšně odeslána ke schválení. Budete informováni e-mailem.' });
-      setFormData({ name: '', email: '' });
-      setSelectedSlot(null);
-      setSelectedDate(null);
+      const queryParams = new URLSearchParams({
+        title: selectedSlot.title,
+        date: selectedSlot.date,
+        timeSlot: selectedSlot.timeSlot,
+        name: formData.name
+      }).toString();
+      
+      router.push(`/rezervace/uspech?${queryParams}`);
     } else {
       setMessage({ type: 'error', text: result.error || 'Došlo k chybě.' });
     }

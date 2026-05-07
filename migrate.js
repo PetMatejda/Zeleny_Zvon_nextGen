@@ -17,16 +17,75 @@ async function run() {
     `);
     console.log('Tabulka reservation_slots vytvořena nebo již existuje.');
 
-    // 2. Add slotId column to reservations if it doesn't exist
-    const tableInfo = await db.run(sql`PRAGMA table_info(reservations)`);
-    const hasSlotId = tableInfo.rows.some(col => col.name === 'slotId');
-    
-    if (!hasSlotId) {
-      await db.run(sql`ALTER TABLE reservations ADD COLUMN slotId INTEGER REFERENCES reservation_slots(id)`);
-      console.log('Sloupec slotId přidán do tabulky reservations.');
+    // 2. Add slotId column to reservations if it doesn't exist, or create table
+    const tableCheck = await db.run(sql`SELECT name FROM sqlite_master WHERE type='table' AND name='reservations'`);
+    if (tableCheck.rows.length === 0) {
+      await db.run(sql`
+        CREATE TABLE reservations (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          email TEXT NOT NULL,
+          date TEXT NOT NULL,
+          timeSlot TEXT NOT NULL,
+          slotId INTEGER REFERENCES reservation_slots(id),
+          status TEXT DEFAULT 'pending',
+          createdAt TEXT DEFAULT (CURRENT_TIMESTAMP)
+        )
+      `);
+      console.log('Tabulka reservations vytvořena.');
     } else {
-      console.log('Sloupec slotId již v tabulce reservations existuje.');
+      const tableInfo = await db.run(sql`PRAGMA table_info(reservations)`);
+      const hasSlotId = tableInfo.rows.some(col => col.name === 'slotId');
+      
+      if (!hasSlotId) {
+        await db.run(sql`ALTER TABLE reservations ADD COLUMN slotId INTEGER REFERENCES reservation_slots(id)`);
+        console.log('Sloupec slotId přidán do tabulky reservations.');
+      } else {
+        console.log('Sloupec slotId již v tabulce reservations existuje.');
+      }
     }
+
+    // 3. Create settings table and seed default email template
+    await db.run(sql`
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL,
+        updatedAt TEXT DEFAULT (CURRENT_TIMESTAMP)
+      )
+    `);
+    console.log('Tabulka settings vytvořena nebo již existuje.');
+
+    // 4. Check if updatedAt column exists in settings
+    const settingsTableInfo = await db.run(sql`PRAGMA table_info(settings)`);
+    const hasUpdatedAt = settingsTableInfo.rows.some(col => col.name === 'updatedAt');
+    
+    if (!hasUpdatedAt) {
+      await db.run(sql`ALTER TABLE settings ADD COLUMN updatedAt TEXT DEFAULT (CURRENT_TIMESTAMP)`);
+      console.log('Sloupec updatedAt přidán do tabulky settings.');
+    } else {
+      console.log('Sloupec updatedAt již v tabulce settings existuje.');
+    }
+
+    const defaultTemplate = `
+<div style="font-family: Arial, sans-serif; color: #1b1c19; max-width: 600px; margin: 0 auto; border: 1px solid #765a17; border-radius: 10px; overflow: hidden;">
+  <div style="background-color: #765a17; color: #fff; padding: 20px; text-align: center;">
+    <h1 style="margin: 0; font-size: 24px; font-style: italic;">Zelený Zvon</h1>
+  </div>
+  <div style="padding: 30px;">
+    {{{CONTENT}}}
+  </div>
+  <div style="background-color: #f6f5f1; padding: 15px; text-align: center; font-size: 12px; color: #888;">
+    Zelený Zvon | Zpět k přírodě<br/>Pokud máte jakékoliv dotazy, jednoduše odpovězte na tento e-mail.
+  </div>
+</div>
+    `.trim();
+
+    await db.run(sql`
+      INSERT INTO settings (key, value)
+      SELECT 'email_base_template', ${defaultTemplate}
+      WHERE NOT EXISTS (SELECT 1 FROM settings WHERE key = 'email_base_template')
+    `);
+    console.log('Výchozí šablona e-mailu zkontrolována/vytvořena.');
 
     console.log('Migrace úspěšně dokončena!');
     process.exit(0);

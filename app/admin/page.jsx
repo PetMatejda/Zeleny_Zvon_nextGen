@@ -5,8 +5,9 @@ import { GoogleLogin } from '@react-oauth/google';
 
 export default function AdminPage() {
   const [token, setToken] = useState(null);
-  const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'products', 'coupons', 'reservations'
+  const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'products', 'coupons', 'reservations', 'emails'
   const [orderFilter, setOrderFilter] = useState('Vše');
+  const [emailTemplate, setEmailTemplate] = useState('');
   
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
@@ -90,6 +91,11 @@ export default function AdminPage() {
         if (slotsRes.status === 401 || resRes.status === 401) return handleLogout();
         setSlots(await slotsRes.json());
         setReservationsList(await resRes.json());
+      } else if (activeTab === 'emails') {
+        const res = await fetch(`/api/settings`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res.status === 401 || res.status === 403) return handleLogout();
+        const data = await res.json();
+        setEmailTemplate(data.email_base_template || '');
       }
     } catch (e) {
       console.error(e);
@@ -214,18 +220,46 @@ export default function AdminPage() {
   };
 
   const updateReservationStatus = async (id, status) => {
+    let reason = null;
+    if (status === 'cancelled') {
+      reason = prompt("Zadejte volitelný důvod zamítnutí/zrušení (bude odesláno e-mailem), nebo nechte prázdné:");
+      if (reason === null) return; // User clicked Cancel on prompt
+    }
+
     try {
       const res = await fetch(`/api/admin_reservations/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status, reason })
       });
       if (res.ok) fetchData();
       else {
         const d = await res.json();
         alert(d.error || 'Chyba');
       }
-    } catch(e) {}
+    } catch(e) {
+      console.error(e);
+      alert("Chyba při aktualizaci stavu rezervace.");
+    }
+  };
+
+  const saveEmailTemplate = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`/api/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ email_base_template: emailTemplate })
+      });
+      if (res.ok) {
+        alert("Šablona úspěšně uložena.");
+        fetchData();
+      } else {
+        alert("Chyba při ukládání šablony.");
+      }
+    } catch (e) {
+      alert("Chyba komunikace se serverem.");
+    }
   };
 
   if (!mounted) return null;
@@ -268,6 +302,9 @@ export default function AdminPage() {
            </button>
            <button onClick={() => setActiveTab('reservations')} className={`w-full text-left px-6 py-4 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'reservations' ? 'bg-[#765a17] text-white shadow-md' : 'bg-surface-container hover:bg-surface-variant'}`}>
              <span className="material-symbols-outlined">calendar_month</span> Rezervace a termíny
+           </button>
+           <button onClick={() => setActiveTab('emails')} className={`w-full text-left px-6 py-4 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'emails' ? 'bg-[#765a17] text-white shadow-md' : 'bg-surface-container hover:bg-surface-variant'}`}>
+             <span className="material-symbols-outlined">mail</span> E-maily
            </button>
         </aside>
 
@@ -466,6 +503,36 @@ export default function AdminPage() {
                          {reservationsList.length === 0 && <tr><td colSpan="5" className="p-4 text-center opacity-60">Zatím žádné rezervace.</td></tr>}
                        </tbody>
                      </table>
+                   </div>
+                 </div>
+               )}
+
+               {/* EMAILS TAB */}
+               {activeTab === 'emails' && (
+                 <div>
+                   <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 shadow-sm">
+                     <h3 className="text-xl font-bold mb-4">Správa e-mailových šablon</h3>
+                     <p className="opacity-70 mb-4 text-sm">
+                       Zde můžete upravit HTML šablonu, která se používá jako "obálka" pro všechny odchozí e-maily (objednávky, kontaktní formulář, rezervace).
+                       Nezapomeňte v šabloně ponechat zástupný znak <strong>{'{{{CONTENT}}}'}</strong> tam, kde se má zobrazit samotný text e-mailu.
+                     </p>
+                     <form onSubmit={saveEmailTemplate} className="space-y-4">
+                       <div>
+                         <label className="block text-sm font-semibold opacity-70 mb-2">Výchozí HTML šablona</label>
+                         <textarea
+                           required
+                           className="w-full p-4 rounded-lg bg-surface-container border-none h-[400px] font-mono text-sm leading-relaxed"
+                           value={emailTemplate}
+                           onChange={e => setEmailTemplate(e.target.value)}
+                           spellCheck={false}
+                         />
+                       </div>
+                       <div className="pt-2">
+                         <button type="submit" className="bg-[#765a17] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#614a13] transition-colors">
+                           Uložit šablonu
+                         </button>
+                       </div>
+                     </form>
                    </div>
                  </div>
                )}
