@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '../../../lib/db-drizzle.js';
 import { reservations, reservation_slots } from '../../../lib/schema.js';
 import { authenticateToken } from '../../../lib/auth.js';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 
 export async function GET(request) {
   const { error } = authenticateToken(request);
@@ -21,11 +21,11 @@ export async function GET(request) {
         slotId: reservations.slotId
     })
     .from(reservations)
-    .leftJoin(reservation_slots, eq(reservations.slotId, reservation_slots.id));
+    .leftJoin(reservation_slots, eq(reservations.slotId, reservation_slots.id))
+    .orderBy(desc(reservations.createdAt));
 
-    const sorted = res.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-    return NextResponse.json(sorted);
+    return NextResponse.json(res);
   } catch(e) {
-      return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
 }

@@ -3,12 +3,7 @@ import { db } from '../../../../lib/db-drizzle.js';
 import { products } from '../../../../lib/schema.js';
 import { authenticateToken } from '../../../../lib/auth.js';
 import { eq } from 'drizzle-orm';
-
-function slugify(name) {
-  return name.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
-}
+import { slugify } from '../../../../lib/utils.js';
 
 // PUT /api/products/[id] — update product
 export async function PUT(request, { params }) {

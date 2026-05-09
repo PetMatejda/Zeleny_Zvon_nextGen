@@ -28,8 +28,9 @@ lerna-debug.log*
 .env.production.local
 *.local
 
-# Database and storage (Fixed formatting)
+# Database, storage and data files
 database.sqlite
+schema.html
 uploads/
 
 # Editor directories and files

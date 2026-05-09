@@ -5,11 +5,10 @@ import { authenticateToken } from '../../../lib/auth.js';
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import qrcode from 'qrcode';
 import { sendEmail } from '../../../lib/email.js';
+import { escapeHtml } from '../../../lib/utils.js';
 import PDFDocument from 'pdfkit';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { join } from 'path';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const FONTS_DIR = join(process.cwd(), 'fonts');
 
 // GET /api/orders — list all (auth required)

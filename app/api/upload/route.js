@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { writeFile } from 'fs/promises';
 import { join } from 'path';
-import { UPLOADS_DIR } from '../../../lib/db.js';
+import { UPLOADS_DIR } from '../../../lib/uploads.js';
 import { authenticateToken } from '../../../lib/auth.js';
 
 export async function POST(request) {

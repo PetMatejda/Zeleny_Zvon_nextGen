@@ -1,10 +1,5 @@
 import Link from 'next/link';
 
-export const metadata = {
-  title: 'Zelený Zvon | Holistické studio & E-shop',
-  description: 'Místo, kde tělo a duše nacházejí společnou řeč. Holistické terapie, Bachovy esence, TRE, Pilates a přírodní produkty.',
-};
-
 export default function HomePage() {
   return (
     <main>

@@ -4,7 +4,9 @@ import jwt from 'jsonwebtoken';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com';
 const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_zvon';
-const ALLOWED_ADMINS = ['petmatejda@gmail.com', 'peta.matejickova@gmail.com', 'simon.simanski@gmail.com'];
+const ALLOWED_ADMINS = (process.env.ADMIN_EMAILS || 'petmatejda@gmail.com,peta.matejickova@gmail.com,simon.simanski@gmail.com')
+  .split(',')
+  .map(e => e.trim().toLowerCase());
 const oAuth2Client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 export async function POST(request) {

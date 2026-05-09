@@ -1,6 +1,4 @@
-import React from 'react';
 import ReservationCalendar from '../../components/ReservationCalendar';
-import Script from 'next/script';
 
 export const metadata = {
   title: 'Rezervace | Zelený Zvon',
@@ -43,8 +41,7 @@ export default function RezervacePage() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       {/* JSON-LD pro SEO */}
-      <Script
-        id="reservation-jsonld"
+      <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />

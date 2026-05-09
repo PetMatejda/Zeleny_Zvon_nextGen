@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
-import { UPLOADS_DIR } from '../../../../lib/db.js';
+import { UPLOADS_DIR } from '../../../../lib/uploads.js';
 
 // Replaces express.static('/uploads') — serves uploaded product images
 export async function GET(request, { params }) {

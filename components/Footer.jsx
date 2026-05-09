@@ -31,7 +31,7 @@ export default function Footer() {
             <a className="opacity-70 hover:opacity-100 hover:text-[#765a17] transition-colors" href="#">Facebook</a>
           </div>
           <div className="mt-8">
-            <p className="text-xs opacity-50">© 2024 Zelený Zvon. Vytvořeno pro váš vnitřní klid.</p>
+            <p className="text-xs opacity-50">© {new Date().getFullYear()} Zelený Zvon. Vytvořeno pro váš vnitřní klid.</p>
           </div>
         </div>
       </div>

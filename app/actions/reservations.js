@@ -2,9 +2,11 @@
 
 import { db } from '../../lib/db-drizzle.js';
 import { reservations, reservation_slots } from '../../lib/schema.js';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { google } from 'googleapis';
 import { sendEmail } from '../../lib/email.js';
+import { textToSafeHtml } from '../../lib/utils.js';
+import { getAvailableSlotsForDate, getFutureAvailableSlotsList, getActiveReservationCount } from '../../lib/slot-utils.js';
 
 // Google Calendar setup
 function getCalendarClient() {
@@ -28,29 +30,7 @@ function getCalendarClient() {
 
 export async function getAvailableSlots(dateStr) {
   try {
-    // Fetch all slots for this date
-    const slots = await db.select().from(reservation_slots).where(eq(reservation_slots.date, dateStr));
-    
-    // For each slot, count active reservations
-    const availableSlots = [];
-    for (const slot of slots) {
-      const activeReservations = await db.select().from(reservations).where(
-        and(
-          eq(reservations.slotId, slot.id),
-          sql`${reservations.status} IN ('pending', 'confirmed')`
-        )
-      );
-      
-      const takenCount = activeReservations.length;
-      if (takenCount < slot.capacity) {
-        availableSlots.push({
-          ...slot,
-          availableSpots: slot.capacity - takenCount
-        });
-      }
-    }
-
-    return availableSlots;
+    return await getAvailableSlotsForDate(dateStr);
   } catch (err) {
     console.error('Error fetching available slots:', err);
     return []; 
@@ -59,33 +39,7 @@ export async function getAvailableSlots(dateStr) {
 
 export async function getFutureAvailableSlots() {
   try {
-    const nowStr = new Date().toISOString().split('T')[0];
-    
-    const slots = await db.select().from(reservation_slots).where(sql`${reservation_slots.date} >= ${nowStr}`);
-    
-    const availableSlots = [];
-    for (const slot of slots) {
-      const activeReservations = await db.select().from(reservations).where(
-        and(
-          eq(reservations.slotId, slot.id),
-          sql`${reservations.status} IN ('pending', 'confirmed')`
-        )
-      );
-      
-      const takenCount = activeReservations.length;
-      if (takenCount < slot.capacity) {
-        availableSlots.push({
-          ...slot,
-          availableSpots: slot.capacity - takenCount
-        });
-      }
-    }
-
-    return availableSlots.sort((a, b) => {
-      const dateA = new Date(`${a.date}T${a.timeSlot}`);
-      const dateB = new Date(`${b.date}T${b.timeSlot}`);
-      return dateA - dateB;
-    });
+    return await getFutureAvailableSlotsList();
   } catch (err) {
     console.error('Error fetching future available slots:', err);
     return []; 
@@ -106,14 +60,8 @@ export async function requestBooking(data) {
       return { success: false, error: 'Termín nebyl nalezen.' };
     }
 
-    const activeReservations = await db.select().from(reservations).where(
-        and(
-          eq(reservations.slotId, slotId),
-          sql`${reservations.status} IN ('pending', 'confirmed')`
-        )
-    );
-
-    if (activeReservations.length >= slot.capacity) {
+    const takenCount = await getActiveReservationCount(slotId);
+    if (takenCount >= slot.capacity) {
       return { success: false, error: 'Tento termín už bohužel není volný.' };
     }
 
@@ -129,11 +77,11 @@ export async function requestBooking(data) {
 
     // Notify Admin
     const adminEmail = process.env.SMTP_USER || 'admin@zelenyzvon.cz';
-    const textMsg = `Nová rezervace od ${name} (${email}) na termín ${slot.title} (${slot.date} v ${slot.timeSlot}). Prosím, schvalte ji v administraci.`;
+    const safeText = `Nová rezervace od ${textToSafeHtml(name)} (${textToSafeHtml(email)}) na termín ${textToSafeHtml(slot.title)} (${slot.date} v ${slot.timeSlot}). Prosím, schvalte ji v administraci.`;
     await sendEmail({
       to: adminEmail,
       subject: `Nová žádost o rezervaci - ${name}`,
-      htmlContent: `<p>${textMsg.replace(/\n/g, '<br/>')}</p>`,
+      htmlContent: `<p>${safeText}</p>`,
     }).catch(console.error);
 
     return { success: true };
@@ -186,11 +134,13 @@ export async function approveBooking(id) {
     }
 
     // Send confirmation email to user
-    const textMsg = `Dobrý den ${reservation.name},\n\nVaše rezervace na událost "${slot ? slot.title : 'Rezervace'}" dne ${reservation.date} v ${reservation.timeSlot} byla úspěšně potvrzena.\n\nTěšíme se na Vás!`;
+    const slotTitle = slot ? textToSafeHtml(slot.title) : 'Rezervace';
+    const safeName = textToSafeHtml(reservation.name);
+    const htmlContent = `<p>Dobrý den ${safeName},<br/><br/>Vaše rezervace na událost &quot;${slotTitle}&quot; dne ${reservation.date} v ${reservation.timeSlot} byla úspěšně potvrzena.<br/><br/>Těšíme se na Vás!</p>`;
     await sendEmail({
       to: reservation.email,
       subject: `Potvrzení rezervace - Zelený Zvon`,
-      htmlContent: `<p>${textMsg.replace(/\n/g, '<br/>')}</p>`,
+      htmlContent,
     }).catch(console.error);
 
     return { success: true };
@@ -241,88 +191,29 @@ export async function rejectBooking(id, sendEmailFlag = true, customMessage = nu
     }
 
     if (sendEmailFlag && reservation.email) {
-      let message = customMessage || `Dobrý den ${reservation.name},\n\nVaše rezervace ze dne ${reservation.date} v ${reservation.timeSlot} byla bohužel zrušena.\n\nOmlouváme se za případné komplikace a děkujeme za pochopení.`;
-      
-      if (reason && !customMessage) {
-        message = `Dobrý den ${reservation.name},\n\nVaše rezervace ze dne ${reservation.date} v ${reservation.timeSlot} byla bohužel zrušena.\n\nDůvod zrušení: ${reason}\n\nOmlouváme se za případné komplikace a děkujeme za pochopení.`;
+      const safeName = textToSafeHtml(reservation.name);
+      let htmlContent;
+
+      if (customMessage) {
+        // customMessage is already pre-built HTML-safe content from slot deletion
+        htmlContent = `<p>${customMessage.replace(/\n/g, '<br/>')}</p>`;
+      } else if (reason) {
+        const safeReason = textToSafeHtml(reason);
+        htmlContent = `<p>Dobrý den ${safeName},<br/><br/>Vaše rezervace ze dne ${reservation.date} v ${reservation.timeSlot} byla bohužel zrušena.<br/><br/>Důvod zrušení: ${safeReason}<br/><br/>Omlouváme se za případné komplikace a děkujeme za pochopení.</p>`;
+      } else {
+        htmlContent = `<p>Dobrý den ${safeName},<br/><br/>Vaše rezervace ze dne ${reservation.date} v ${reservation.timeSlot} byla bohužel zrušena.<br/><br/>Omlouváme se za případné komplikace a děkujeme za pochopení.</p>`;
       }
-      
+
       await sendEmail({
         to: reservation.email,
         subject: `Zrušení rezervace - Zelený Zvon`,
-        htmlContent: `<p>${message.replace(/\n/g, '<br/>')}</p>`,
+        htmlContent,
       }).catch(console.error);
     }
 
     return { success: true };
   } catch(error) {
+    console.error('Error rejecting booking:', error);
     return { success: false, error: 'Chyba při rušení.'};
   }
-}
-
-// ADMIN ACTIONS
-export async function getAdminSlots() {
-  try {
-    const slots = await db.select().from(reservation_slots);
-    
-    // attach taken capacity
-    const slotsWithCapacity = [];
-    for (const slot of slots) {
-        const activeReservations = await db.select().from(reservations).where(
-            and(
-              eq(reservations.slotId, slot.id),
-              sql`${reservations.status} IN ('pending', 'confirmed')`
-            )
-        );
-        slotsWithCapacity.push({
-            ...slot,
-            taken: activeReservations.length
-        });
-    }
-    // Sort descending by date
-    return slotsWithCapacity.sort((a,b) => new Date(b.date) - new Date(a.date));
-  } catch(e) { return []; }
-}
-
-export async function createReservationSlot(data) {
-  try {
-    const { title, date, timeSlot, capacity } = data;
-    await db.insert(reservation_slots).values({
-      title, date, timeSlot, capacity: parseInt(capacity)
-    });
-    return { success: true };
-  } catch(e) {
-    return { success: false, error: 'Nepodařilo se vytvořit termín.' };
-  }
-}
-
-export async function deleteReservationSlot(id) {
-  try {
-    // delete slot
-    await db.delete(reservation_slots).where(eq(reservation_slots.id, id));
-    return { success: true };
-  } catch(e) {
-    return { success: false, error: 'Nelze smazat termín.'};
-  }
-}
-
-export async function getAdminReservations() {
-    try {
-        const res = await db.select({
-            id: reservations.id,
-            name: reservations.name,
-            email: reservations.email,
-            date: reservations.date,
-            timeSlot: reservations.timeSlot,
-            status: reservations.status,
-            createdAt: reservations.createdAt,
-            slotTitle: reservation_slots.title
-        })
-        .from(reservations)
-        .leftJoin(reservation_slots, eq(reservations.slotId, reservation_slots.id));
-
-        return res.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-    } catch(e) {
-        return [];
-    }
 }

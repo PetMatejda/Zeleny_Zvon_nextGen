@@ -155,7 +155,7 @@ export default function AdminPage() {
     try {
       const res = await fetch(`/api/products/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) fetchData();
-    } catch(e) {}
+    } catch(e) { console.error('Chyba při mazání produktu:', e); }
   };
 
   const saveCoupon = async (e) => {
@@ -180,7 +180,7 @@ export default function AdminPage() {
     try {
       const res = await fetch(`/api/coupons/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) fetchData();
-    } catch(e) {}
+    } catch(e) { console.error('Chyba při mazání kupónu:', e); }
   };
 
   const updateOrderStatus = async (id, status) => {
@@ -191,7 +191,7 @@ export default function AdminPage() {
         body: JSON.stringify({ status })
       });
       if (res.ok) fetchData();
-    } catch(e) {}
+    } catch(e) { console.error('Chyba při aktualizaci stavu objednávky:', e); }
   };
 
   const saveSlot = async (e) => {
@@ -216,7 +216,7 @@ export default function AdminPage() {
     try {
       const res = await fetch(`/api/slots/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
       if (res.ok) fetchData();
-    } catch(e) {}
+    } catch(e) { console.error('Chyba při mazání termínu:', e); }
   };
 
   const updateReservationStatus = async (id, status) => {
