@@ -319,7 +319,7 @@ export default function AdminPage() {
                {activeTab === 'orders' && (
                  <div>
                     <div className="flex flex-wrap gap-2 mb-6">
-                      {['Vše', 'Nová', 'Zaplacená', 'Odeslaná', 'Zrušená'].map(f => (
+                      {['Vše', 'Nová', 'Zaplacená', 'Chybná částka', 'Odeslaná', 'Zrušená'].map(f => (
                         <button key={f} onClick={() => setOrderFilter(f)} className={`px-4 py-2 rounded-full text-sm font-bold ${orderFilter === f ? 'bg-[#765a17] text-white' : 'bg-surface-container hover:bg-surface-variant'}`}>{f}</button>
                       ))}
                     </div>
@@ -334,10 +334,10 @@ export default function AdminPage() {
                               <td className="p-4 font-mono font-bold text-sm">#{order.id}</td>
                               <td className="p-4 text-sm opacity-80">{new Date(order.createdAt).toLocaleDateString('cs-CZ')}</td>
                               <td className="p-4"><div className="font-bold">{order.customerName}</div><div className="text-xs opacity-60">{order.email}</div></td>
-                              <td className="p-4 font-bold">{order.totalAmount} Kč</td>
+                              <td className="p-4 font-bold">{order.totalAmount / 100} Kč</td>
                               <td className="p-4">
-                                <select value={order.status} onChange={(e) => updateOrderStatus(order.id, e.target.value)} className={`text-sm px-3 py-1 rounded-full font-bold outline-none cursor-pointer ${order.status === 'Nová' ? 'bg-blue-100 text-blue-800' : order.status === 'Zaplacená' ? 'bg-green-100 text-green-800' : order.status === 'Zrušená' ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-800'}`}>
-                                  <option value="Nová">Nová</option><option value="Zaplacená">Zaplacená</option><option value="Odeslaná">Odeslaná</option><option value="Zrušená">Zrušená</option>
+                                <select value={order.status} onChange={(e) => updateOrderStatus(order.id, e.target.value)} className={`text-sm px-3 py-1 rounded-full font-bold outline-none cursor-pointer ${order.status === 'Nová' ? 'bg-blue-100 text-blue-800' : order.status === 'Zaplacená' ? 'bg-green-100 text-green-800' : order.status === 'Chybná částka' ? 'bg-orange-100 text-orange-800' : order.status === 'Zrušená' ? 'bg-red-100 text-red-800' : 'bg-gray-200 text-gray-800'}`}>
+                                  <option value="Nová">Nová</option><option value="Zaplacená">Zaplacená</option><option value="Chybná částka">Chybná částka</option><option value="Odeslaná">Odeslaná</option><option value="Zrušená">Zrušená</option>
                                 </select>
                               </td>
                               <td className="p-4">
@@ -575,7 +575,7 @@ export default function AdminPage() {
               </div>
               <div className="flex justify-between items-center pt-6 border-t border-outline-variant/30">
                 <span className="text-lg opacity-80">Celková částka po slevách</span>
-                <span className="text-3xl font-bold text-[#765a17]">{selectedOrderDetails.totalAmount.toLocaleString('cs-CZ')} Kč</span>
+                <span className="text-3xl font-bold text-[#765a17]">{(selectedOrderDetails.totalAmount / 100).toLocaleString('cs-CZ')} Kč</span>
               </div>
            </div>
         </div>

@@ -48,7 +48,7 @@ export async function POST(request) {
         }
       }
 
-      finalAmount = Math.round(finalAmount);
+      finalAmount = Math.round(finalAmount * 100);
 
       const [newOrder] = await tx.insert(orders).values({
         customerName,
@@ -71,17 +71,17 @@ export async function POST(request) {
     });
 
     // Generate SPAYD QR code
-    const formattedAmount = Number(orderResult.totalAmount).toFixed(2);
+    const formattedAmount = (Number(orderResult.totalAmount) / 100).toFixed(2);
     const spaydStr = `SPD*1.0*ACC:CZ5108000000001570560063*AM:${formattedAmount}*CC:CZK*X-VS:${orderResult.id}*MSG:Objednavka%20${orderResult.id}%20Zeleny%20Zvon`;
     const qrCodeDataUrl = await qrcode.toDataURL(spaydStr, { margin: 2, scale: 5 });
 
     // Async: generate invoice & send email (non-blocking)
-    setTimeout(() => generateAndSendInvoice(orderResult.id, customerName, email, address, orderResult.totalAmount, items, qrCodeDataUrl), 50);
+    setTimeout(() => generateAndSendInvoice(orderResult.id, customerName, email, address, orderResult.totalAmount / 100, items, qrCodeDataUrl), 50);
 
     return NextResponse.json({ 
       id: orderResult.id, 
       status: 'Nová', 
-      totalAmount: orderResult.totalAmount, 
+      totalAmount: orderResult.totalAmount / 100, 
       qrCode: qrCodeDataUrl 
     });
 
