@@ -35,7 +35,7 @@ export default function SuccessPage() {
         
         <div className="space-y-4 mb-8 text-center text-lg">
           <p>Celková částka: <strong className="font-bold text-2xl">{order.totalAmount} Kč</strong></p>
-          <p>Číslo účtu: <strong className="font-mono bg-surface-container-high px-2 py-1 rounded">1570560063/0800</strong></p>
+          <p>Číslo účtu: <strong className="font-mono bg-surface-container-high px-2 py-1 rounded">{order.bankAccount || '1570560063/0800'}</strong></p>
           <p>Variabilní symbol: <strong className="font-mono bg-surface-container-high px-2 py-1 rounded">{order.id}</strong></p>
         </div>
 

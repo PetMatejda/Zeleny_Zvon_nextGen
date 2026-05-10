@@ -6,7 +6,7 @@ import { useCart } from '../../components/CartProvider';
 import Link from 'next/link';
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, clearCart } = useCart();
+  const { cart, cartTotal, clearCart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
   
   const [formData, setFormData] = useState({
@@ -43,9 +43,13 @@ export default function CheckoutPage() {
   const finalPrice = () => {
     if (!couponResult) return cartTotal;
     if (couponResult.discount_type === 'percent') {
-      return Math.round(cartTotal * (1 - couponResult.discount_value / 100));
+      return cartTotal * (1 - couponResult.discount_value / 100);
     }
     return Math.max(0, cartTotal - couponResult.discount_value);
+  };
+
+  const formatPrice = (price) => {
+    return Number(price).toLocaleString('cs-CZ', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   };
 
   const handleSubmit = async (e) => {
@@ -97,8 +101,8 @@ export default function CheckoutPage() {
   }
 
   return (
-    <main className="max-w-6xl mx-auto px-8 pt-12 pb-24 font-plusjakarta flex flex-col lg:flex-row gap-16">
-      <div className="flex-1">
+    <main className="max-w-7xl mx-auto px-8 pt-12 pb-32 font-plusjakarta flex flex-col lg:flex-row gap-16 lg:gap-24">
+      <div className="flex-1 lg:max-w-3xl">
         <h1 className="text-4xl font-headline italic mb-8 text-[#1b1c19] dark:text-[#faf9f4]">Dokončení objednávky</h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -140,17 +144,34 @@ export default function CheckoutPage() {
         </form>
       </div>
 
-      <div className="lg:w-[400px]">
-        <div className="bg-surface-container-low p-8 rounded-2xl sticky top-28 shadow-lg">
+      <div className="lg:w-[450px] xl:w-[480px]">
+        <div className="bg-surface-container-low p-8 lg:p-10 rounded-3xl sticky top-28 shadow-xl border border-[#765a17]/5">
           <h2 className="text-2xl font-headline italic mb-6 border-b border-[#765a17]/20 pb-4">Shrnutí košíku</h2>
           <div className="space-y-4 mb-6">
             {cart.map(item => (
-              <div key={item.id} className="flex justify-between items-start gap-4">
-                 <div className="flex-1">
-                   <h4 className="font-bold text-on-surface leading-tight">{item.name}</h4>
-                   <p className="text-sm opacity-70 mt-1">{item.quantity} ks</p>
-                 </div>
-                 <span className="font-semibold text-nowrap">{(item.price * item.quantity).toLocaleString('cs-CZ')} Kč</span>
+              <div key={item.id} className="flex flex-col gap-3 border-b border-[#765a17]/10 pb-4 last:border-0 last:pb-0">
+                <div className="flex justify-between items-start gap-4">
+                   <div className="flex-1">
+                     <Link href={`/eshop/${item.slug || item.id}`}>
+                       <h4 className="font-bold text-on-surface leading-tight hover:text-[#765a17] transition-colors hover:underline underline-offset-4 cursor-pointer">{item.name}</h4>
+                     </Link>
+                   </div>
+                   <span className="font-semibold text-nowrap">{formatPrice(item.price * item.quantity)} Kč</span>
+                </div>
+                <div className="flex justify-between items-center">
+                   <div className="flex items-center gap-3 bg-surface-container rounded-full px-2 py-1 border border-[#765a17]/20">
+                     <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-7 h-7 flex items-center justify-center text-[#765a17] hover:bg-[#765a17]/10 rounded-full transition-colors font-bold text-lg">
+                       -
+                     </button>
+                     <span className="text-sm font-bold w-4 text-center">{item.quantity}</span>
+                     <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-7 h-7 flex items-center justify-center text-[#765a17] hover:bg-[#765a17]/10 rounded-full transition-colors font-bold text-lg">
+                       +
+                     </button>
+                   </div>
+                   <button type="button" onClick={() => removeFromCart(item.id)} className="text-sm text-red-500 hover:text-red-700 transition-colors flex items-center gap-1 font-semibold">
+                     <span className="material-symbols-outlined text-[18px]">delete</span> Odebrat
+                   </button>
+                </div>
               </div>
             ))}
           </div>
@@ -158,17 +179,17 @@ export default function CheckoutPage() {
           <div className="border-t border-[#765a17]/20 pt-4 space-y-2 mb-6">
              <div className="flex justify-between text-sm opacity-70">
                <span>Mezisoučet</span>
-               <span>{cartTotal.toLocaleString('cs-CZ')} Kč</span>
+               <span>{formatPrice(cartTotal)} Kč</span>
              </div>
              {couponResult && (
                <div className="flex justify-between text-sm text-green-600 font-bold">
                  <span>Sleva ({couponCode})</span>
-                 <span>-{(cartTotal - finalPrice()).toLocaleString('cs-CZ')} Kč</span>
+                 <span>-{formatPrice(cartTotal - finalPrice())} Kč</span>
                </div>
              )}
              <div className="flex justify-between text-xl font-bold mt-4 pt-4 border-t border-[#765a17]/20">
                <span>Celkem k úhradě</span>
-               <span className="text-[#765a17] dark:text-[#ffdf9f]">{finalPrice().toLocaleString('cs-CZ')} Kč</span>
+               <span className="text-[#765a17] dark:text-[#ffdf9f]">{formatPrice(finalPrice())} Kč</span>
              </div>
           </div>
           <div className="flex items-center gap-2 text-sm opacity-60">

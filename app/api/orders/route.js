@@ -72,7 +72,8 @@ export async function POST(request) {
 
     // Generate SPAYD QR code
     const formattedAmount = (Number(orderResult.totalAmount) / 100).toFixed(2);
-    const spaydStr = `SPD*1.0*ACC:CZ5108000000001570560063*AM:${formattedAmount}*CC:CZK*X-VS:${orderResult.id}*MSG:Objednavka%20${orderResult.id}%20Zeleny%20Zvon`;
+    const bankAccountIban = process.env.BANK_ACCOUNT_IBAN || 'CZ5108000000001570560063';
+    const spaydStr = `SPD*1.0*ACC:${bankAccountIban}*AM:${formattedAmount}*CC:CZK*X-VS:${orderResult.id}*MSG:Objednavka%20${orderResult.id}%20Zeleny%20Zvon`;
     const qrCodeDataUrl = await qrcode.toDataURL(spaydStr, { margin: 2, scale: 5 });
 
     // Async: generate invoice & send email (non-blocking)
@@ -82,7 +83,8 @@ export async function POST(request) {
       id: orderResult.id, 
       status: 'Nová', 
       totalAmount: orderResult.totalAmount / 100, 
-      qrCode: qrCodeDataUrl 
+      qrCode: qrCodeDataUrl,
+      bankAccount: process.env.BANK_ACCOUNT || '1570560063/0800'
     });
 
   } catch (err) {
@@ -119,6 +121,8 @@ async function generateAndSendInvoice(orderId, name, email, address, amount, ite
         const qrBase64 = qrCodeDataUrl.replace(/^data:image\/png;base64,/, '');
         const qrBufferEmail = Buffer.from(qrBase64, 'base64');
 
+        const bankAccountDisplay = process.env.BANK_ACCOUNT || '1570560063/0800';
+
         const htmlContent = `
           <h2 style="margin-top: 0; color: #558266; font-size: 24px; font-weight: normal;">Děkujeme za vaši objednávku!</h2>
           <p style="margin-top: 0; margin-bottom: 15px;">Vážený/á zákazníku,</p>
@@ -134,7 +138,7 @@ async function generateAndSendInvoice(orderId, name, email, address, amount, ite
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size: 16px; line-height: 1.6; color: #444444;">
                   <tr>
                       <td width="140" style="padding-bottom: 8px; color: #666666;">Číslo účtu:</td>
-                      <td style="padding-bottom: 8px;"><strong style="color: #333333; font-size: 17px;">1570560063/0800</strong></td>
+                      <td style="padding-bottom: 8px;"><strong style="color: #333333; font-size: 17px;">${bankAccountDisplay}</strong></td>
                   </tr>
                   <tr>
                       <td style="color: #666666;">Variabilní symbol:</td>
@@ -210,7 +214,8 @@ async function generateAndSendInvoice(orderId, name, email, address, amount, ite
     doc.y = boxY + 20;
     doc.font('Roboto-Bold').fontSize(12).fillColor('#1b1c19').text('Platební údaje:');
     doc.moveDown(0.5);
-    doc.font('Roboto').text(`Prosíme o úhradu převodem.\n\nČíslo účtu: 1570560063/0800\nVariabilní symbol: ${orderId}\nČástka k úhradě: ${amount} Kč`);
+    const bankAccountDisplayPdf = process.env.BANK_ACCOUNT || '1570560063/0800';
+    doc.font('Roboto').text(`Prosíme o úhradu převodem.\n\nČíslo účtu: ${bankAccountDisplayPdf}\nVariabilní symbol: ${orderId}\nČástka k úhradě: ${amount} Kč`);
     const base64Data = qrCodeDataUrl.replace(/^data:image\/png;base64,/, '');
     const qrBuffer = Buffer.from(base64Data, 'base64');
     doc.image(qrBuffer, 380, boxY + 15, { width: 120 });

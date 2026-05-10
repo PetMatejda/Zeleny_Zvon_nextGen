@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
 
 const CartContext = createContext();
 
@@ -8,6 +8,25 @@ export const useCart = () => useContext(CartContext);
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('zeleny_zvon_cart');
+      if (saved) {
+        setCart(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error('Failed to load cart', e);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('zeleny_zvon_cart', JSON.stringify(cart));
+    }
+  }, [cart, isLoaded]);
 
   const addToCart = (product, quantity = 1) => {
     setCart(prev => {
