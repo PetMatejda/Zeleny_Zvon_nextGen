@@ -87,6 +87,42 @@ async function run() {
     `);
     console.log('Výchozí šablona e-mailu zkontrolována/vytvořena.');
 
+    // 4b. Výchozí ceny dopravy
+    await db.run(sql`
+      INSERT INTO settings (key, value)
+      SELECT 'price_packeta_zbox', '95'
+      WHERE NOT EXISTS (SELECT 1 FROM settings WHERE key = 'price_packeta_zbox')
+    `);
+
+    await db.run(sql`
+      INSERT INTO settings (key, value)
+      SELECT 'price_packeta_home', '140'
+      WHERE NOT EXISTS (SELECT 1 FROM settings WHERE key = 'price_packeta_home')
+    `);
+    console.log('Výchozí ceny dopravy zkontrolovány/vytvořeny.');
+
+    // 5. Přidání sloupců pro dopravu a Zásilkovnu do tabulky orders
+    const ordersTableInfo = await db.run(sql`PRAGMA table_info(orders)`);
+    const ordersColumns = ordersTableInfo.rows.map(col => col.name);
+
+    const newOrdersColumns = [
+      { name: 'shippingMethod', definition: `TEXT DEFAULT 'pickup'` },
+      { name: 'packetaPointId', definition: 'TEXT' },
+      { name: 'packetaPointName', definition: 'TEXT' },
+      { name: 'deliveryAddress', definition: 'TEXT' },
+      { name: 'packetaBarcode', definition: 'TEXT' },
+      { name: 'packetaPacketId', definition: 'TEXT' },
+    ];
+
+    for (const col of newOrdersColumns) {
+      if (!ordersColumns.includes(col.name)) {
+        await db.run(sql.raw(`ALTER TABLE orders ADD COLUMN ${col.name} ${col.definition}`));
+        console.log(`Sloupec ${col.name} přidán do tabulky orders.`);
+      } else {
+        console.log(`Sloupec ${col.name} již v tabulce orders existuje.`);
+      }
+    }
+
     console.log('Migrace úspěšně dokončena!');
     process.exit(0);
   } catch (err) {

@@ -30,7 +30,10 @@ export default function AboutProducts({ products }) {
                 <h3 className="text-lg font-notoserif text-on-surface leading-tight mb-2">{product.name}</h3>
                 <div className="flex justify-between items-center mt-auto pt-2">
                   <span className="text-lg font-semibold">{product.price?.toLocaleString('cs-CZ')} Kč</span>
-                  <button onClick={() => addToCart(product)} className="text-sm font-medium text-[#765a17] dark:text-[#ffdf9f] underline underline-offset-4 hover:text-primary-container transition-colors">Vložit do košíku</button>
+                  <button onClick={() => addToCart(product)} className="flex items-center gap-1.5 text-sm font-semibold text-[#765a17] bg-[#765a17]/10 dark:text-[#ffdf9f] dark:bg-[#ffdf9f]/10 px-4 py-2 rounded-full hover:bg-[#765a17] hover:text-white dark:hover:bg-[#ffdf9f] dark:hover:text-neutral-900 transition-all active:scale-95">
+                    <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
+                    Do košíku
+                  </button>
                 </div>
               </div>
             </div>

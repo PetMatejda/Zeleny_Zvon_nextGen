@@ -67,7 +67,10 @@ export default function EShopClient({ initialProducts }) {
         <p className="text-sm opacity-70 mb-4 line-clamp-2">{product.description}</p>
         <div className="flex justify-between items-center mt-auto">
           <span className="text-lg font-semibold">{product.price.toLocaleString('cs-CZ')} Kč</span>
-          <button onClick={(e) => { e.stopPropagation(); addToCart(product); }} className="text-sm font-medium text-[#765a17] dark:text-[#ffdf9f] underline underline-offset-4 hover:text-primary-container transition-colors">Vložit</button>
+          <button onClick={(e) => { e.stopPropagation(); addToCart(product); }} className="flex items-center gap-1.5 text-sm font-semibold text-[#765a17] bg-[#765a17]/10 dark:text-[#ffdf9f] dark:bg-[#ffdf9f]/10 px-3 py-1.5 rounded-full hover:bg-[#765a17] hover:text-white dark:hover:bg-[#ffdf9f] dark:hover:text-neutral-900 transition-all active:scale-95">
+            <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
+            Vložit
+          </button>
         </div>
       </div>
     </div>

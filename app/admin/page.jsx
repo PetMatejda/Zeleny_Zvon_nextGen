@@ -8,6 +8,10 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('orders'); // 'orders', 'products', 'coupons', 'reservations', 'emails'
   const [orderFilter, setOrderFilter] = useState('Vše');
   const [emailTemplate, setEmailTemplate] = useState('');
+  const [priceZbox, setPriceZbox] = useState('95');
+  const [priceHome, setPriceHome] = useState('140');
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsMessage, setSettingsMessage] = useState(null);
   
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
@@ -91,11 +95,13 @@ export default function AdminPage() {
         if (slotsRes.status === 401 || resRes.status === 401) return handleLogout();
         setSlots(await slotsRes.json());
         setReservationsList(await resRes.json());
-      } else if (activeTab === 'emails') {
+      } else if (activeTab === 'emails' || activeTab === 'settings') {
         const res = await fetch(`/api/settings`, { headers: { 'Authorization': `Bearer ${token}` } });
         if (res.status === 401 || res.status === 403) return handleLogout();
         const data = await res.json();
         setEmailTemplate(data.email_base_template || '');
+        if (data.price_packeta_zbox) setPriceZbox(data.price_packeta_zbox);
+        if (data.price_packeta_home) setPriceHome(data.price_packeta_home);
       }
     } catch (e) {
       console.error(e);
@@ -109,6 +115,14 @@ export default function AdminPage() {
       const res = await fetch(`/api/orders/${order.id}/items`, { headers: { 'Authorization': `Bearer ${token}` }});
       if (res.ok) setSelectedOrderDetails({ ...order, items: await res.json() });
     } catch(e) { console.error(e); }
+  };
+
+  const openInvoice = (orderId) => {
+    window.open(`/api/orders/${orderId}/invoice?token=${token}`, '_blank');
+  };
+
+  const openLabel = (orderId) => {
+    window.open(`/api/orders/${orderId}/label?token=${token}`, '_blank');
   };
 
   const handleImageUpload = async (e) => {
@@ -243,22 +257,30 @@ export default function AdminPage() {
     }
   };
 
-  const saveEmailTemplate = async (e) => {
+  const handleSaveSettings = async (e) => {
     e.preventDefault();
+    setSavingSettings(true);
+    setSettingsMessage(null);
     try {
       const res = await fetch(`/api/settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ email_base_template: emailTemplate })
+        body: JSON.stringify({ 
+          email_base_template: emailTemplate,
+          price_packeta_zbox: priceZbox,
+          price_packeta_home: priceHome
+        })
       });
       if (res.ok) {
-        alert("Šablona úspěšně uložena.");
+        setSettingsMessage({ type: 'success', text: 'Nastavení úspěšně uloženo.' });
         fetchData();
       } else {
-        alert("Chyba při ukládání šablony.");
+        setSettingsMessage({ type: 'error', text: 'Chyba při ukládání nastavení.' });
       }
     } catch (e) {
-      alert("Chyba komunikace se serverem.");
+      setSettingsMessage({ type: 'error', text: 'Chyba komunikace se serverem.' });
+    } finally {
+      setSavingSettings(false);
     }
   };
 
@@ -303,8 +325,8 @@ export default function AdminPage() {
            <button onClick={() => setActiveTab('reservations')} className={`w-full text-left px-6 py-4 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'reservations' ? 'bg-[#765a17] text-white shadow-md' : 'bg-surface-container hover:bg-surface-variant'}`}>
              <span className="material-symbols-outlined">calendar_month</span> Rezervace a termíny
            </button>
-           <button onClick={() => setActiveTab('emails')} className={`w-full text-left px-6 py-4 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'emails' ? 'bg-[#765a17] text-white shadow-md' : 'bg-surface-container hover:bg-surface-variant'}`}>
-             <span className="material-symbols-outlined">mail</span> E-maily
+           <button onClick={() => setActiveTab('settings')} className={`w-full text-left px-6 py-4 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'settings' ? 'bg-[#765a17] text-white shadow-md' : 'bg-surface-container hover:bg-surface-variant'}`}>
+             <span className="material-symbols-outlined">settings</span> Ostatní
            </button>
         </aside>
 
@@ -515,29 +537,69 @@ export default function AdminPage() {
                  </div>
                )}
 
-               {/* EMAILS TAB */}
-               {activeTab === 'emails' && (
+               {/* SETTINGS TAB */}
+               {activeTab === 'settings' && (
                  <div>
                    <div className="bg-surface-container-low p-6 rounded-xl border border-outline-variant/30 shadow-sm">
-                     <h3 className="text-xl font-bold mb-4">Správa e-mailových šablon</h3>
-                     <p className="opacity-70 mb-4 text-sm">
-                       Zde můžete upravit HTML šablonu, která se používá jako "obálka" pro všechny odchozí e-maily (objednávky, kontaktní formulář, rezervace).
-                       Nezapomeňte v šabloně ponechat zástupný znak <strong>{'{{{CONTENT}}}'}</strong> tam, kde se má zobrazit samotný text e-mailu.
-                     </p>
-                     <form onSubmit={saveEmailTemplate} className="space-y-4">
-                       <div>
-                         <label className="block text-sm font-semibold opacity-70 mb-2">Výchozí HTML šablona</label>
+                     <div className="mb-6">
+                       <h3 className="text-xl font-bold mb-1">Ostatní nastavení</h3>
+                       <p className="opacity-70 text-sm">Zde můžete spravovat ceny dopravy a výchozí šablonu e-mailů.</p>
+                     </div>
+
+                     {settingsMessage && (
+                       <div className={`p-4 mb-6 rounded-lg text-sm font-bold ${settingsMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                         {settingsMessage.text}
+                       </div>
+                     )}
+
+                     <form onSubmit={handleSaveSettings} className="space-y-8">
+                       
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-surface-container p-6 rounded-xl">
+                         <div className="md:col-span-2">
+                            <h4 className="font-bold flex items-center gap-2 border-b border-outline-variant/30 pb-2">
+                              <span className="material-symbols-outlined text-[#765a17]">local_shipping</span> Ceny Dopravy (Kč)
+                            </h4>
+                         </div>
+                         <div>
+                           <label className="block text-sm font-semibold opacity-70 mb-2">Zásilkovna — Z-BOX a výdejní místa</label>
+                           <input
+                             type="number" required
+                             className="w-full p-3 rounded-lg bg-surface border-none"
+                             value={priceZbox}
+                             onChange={e => setPriceZbox(e.target.value)}
+                           />
+                         </div>
+                         <div>
+                           <label className="block text-sm font-semibold opacity-70 mb-2">Zásilkovna — Doručení domů</label>
+                           <input
+                             type="number" required
+                             className="w-full p-3 rounded-lg bg-surface border-none"
+                             value={priceHome}
+                             onChange={e => setPriceHome(e.target.value)}
+                           />
+                         </div>
+                       </div>
+
+                       <div className="bg-surface-container p-6 rounded-xl">
+                         <h4 className="font-bold flex items-center gap-2 border-b border-outline-variant/30 pb-2 mb-4">
+                            <span className="material-symbols-outlined text-[#765a17]">mail</span> Základní HTML šablona e-mailů
+                         </h4>
+                         <p className="opacity-70 mb-4 text-sm">
+                           Tato šablona slouží jako obálka pro všechny odchozí e-maily. Zástupný znak <strong>{'{{{CONTENT}}}'}</strong> bude nahrazen konkrétním textem zprávy.
+                         </p>
                          <textarea
                            required
-                           className="w-full p-4 rounded-lg bg-surface-container border-none h-[400px] font-mono text-sm leading-relaxed"
+                           className="w-full p-4 rounded-lg bg-surface border-none h-[400px] font-mono text-sm leading-relaxed"
                            value={emailTemplate}
                            onChange={e => setEmailTemplate(e.target.value)}
                            spellCheck={false}
                          />
                        </div>
-                       <div className="pt-2">
-                         <button type="submit" className="bg-[#765a17] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#614a13] transition-colors">
-                           Uložit šablonu
+
+                       <div className="flex justify-end pt-2">
+                         <button type="submit" disabled={savingSettings} className="bg-[#765a17] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#614a13] transition-colors flex items-center gap-2 disabled:opacity-50">
+                           {savingSettings ? <span className="material-symbols-outlined animate-spin">sync</span> : <span className="material-symbols-outlined">save</span>}
+                           {savingSettings ? 'Ukládám...' : 'Uložit všechna nastavení'}
                          </button>
                        </div>
                      </form>
@@ -557,12 +619,78 @@ export default function AdminPage() {
                 <h2 className="text-2xl font-headline italic">Detail objednávky #{selectedOrderDetails.id}</h2>
                 <button onClick={() => setSelectedOrderDetails(null)} className="w-10 h-10 bg-surface-container flex items-center justify-center rounded-full hover:bg-surface-variant"><span className="material-symbols-outlined">close</span></button>
               </div>
-              <div className="grid grid-cols-2 gap-6 mb-8 bg-surface-container-low p-6 rounded-xl border border-outline-variant/30">
+
+              {/* Akce — faktura + štítek */}
+              <div className="flex flex-wrap gap-3 mb-6">
+                <button
+                  onClick={() => openInvoice(selectedOrderDetails.id)}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#765a17] text-white rounded-lg font-bold text-sm hover:bg-[#5b4300] transition-colors"
+                >
+                  <span className="material-symbols-outlined text-base">description</span>
+                  Stáhnout fakturu PDF
+                </button>
+                {selectedOrderDetails.packetaBarcode && (
+                  <button
+                    onClick={() => openLabel(selectedOrderDetails.id)}
+                    className="flex items-center gap-2 px-4 py-2 bg-surface-container-high hover:bg-surface-variant rounded-lg font-bold text-sm transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-base">print</span>
+                    Tisk štítku Zásilkovny
+                  </button>
+                )}
+              </div>
+
+              {/* Základní info */}
+              <div className="grid grid-cols-2 gap-6 mb-6 bg-surface-container-low p-6 rounded-xl border border-outline-variant/30">
                  <div><p className="text-sm opacity-60 uppercase font-bold tracking-wider mb-1">Zákazník</p><p className="font-bold">{selectedOrderDetails.customerName}</p><p className="opacity-80">{selectedOrderDetails.email}</p></div>
                  <div><p className="text-sm opacity-60 uppercase font-bold tracking-wider mb-1">Adresa</p><p className="whitespace-pre-wrap">{selectedOrderDetails.address || 'Nevyplněno'}</p></div>
                  <div><p className="text-sm opacity-60 uppercase font-bold tracking-wider mb-1">Vytvořeno</p><p>{new Date(selectedOrderDetails.createdAt).toLocaleString('cs-CZ')}</p></div>
                  <div><p className="text-sm opacity-60 uppercase font-bold tracking-wider mb-1">Status</p><span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-bold text-sm">{selectedOrderDetails.status}</span></div>
               </div>
+
+              {/* Doprava */}
+              <div className="mb-6 bg-surface-container-low p-5 rounded-xl border border-outline-variant/30">
+                <p className="text-sm opacity-60 uppercase font-bold tracking-wider mb-3">Doprava</p>
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[#765a17] text-lg">
+                      {selectedOrderDetails.shippingMethod === 'pickup' ? 'store' :
+                       selectedOrderDetails.shippingMethod === 'home_delivery' ? 'local_shipping' : 'package_2'}
+                    </span>
+                    <span className="font-bold">
+                      {selectedOrderDetails.shippingMethod === 'pickup' ? 'Osobní odběr' :
+                       selectedOrderDetails.shippingMethod === 'home_delivery' ? 'Zásilkovna — doručení domů' :
+                       selectedOrderDetails.shippingMethod === 'packeta_zbox' ? 'Zásilkovna — výdejní místo / Z-BOX' :
+                       selectedOrderDetails.shippingMethod || 'Neuvedeno'}
+                    </span>
+                  </div>
+                  {selectedOrderDetails.packetaPointName && (
+                    <div className="text-sm opacity-70">
+                      <span className="material-symbols-outlined text-base align-middle mr-1">location_on</span>
+                      {selectedOrderDetails.packetaPointName}
+                      {selectedOrderDetails.packetaPointId && <span className="ml-1 font-mono opacity-50">(ID: {selectedOrderDetails.packetaPointId})</span>}
+                    </div>
+                  )}
+                  {selectedOrderDetails.deliveryAddress && (
+                    <div className="text-sm opacity-70 w-full">
+                      <span className="material-symbols-outlined text-base align-middle mr-1">home</span>
+                      {selectedOrderDetails.deliveryAddress}
+                    </div>
+                  )}
+                </div>
+                {selectedOrderDetails.packetaBarcode && (
+                  <div className="mt-3 pt-3 border-t border-outline-variant/20 flex items-center gap-3">
+                    <span className="text-xs uppercase font-bold opacity-60 tracking-wider">Barcode Zásilkovny:</span>
+                    <span className="font-mono font-bold text-sm bg-surface-container px-3 py-1 rounded-lg">{selectedOrderDetails.packetaBarcode}</span>
+                  </div>
+                )}
+                {!selectedOrderDetails.packetaBarcode && selectedOrderDetails.shippingMethod !== 'pickup' && (
+                  <div className="mt-3 pt-3 border-t border-outline-variant/20">
+                    <span className="text-xs opacity-50 italic">Zásilka zatím nebyla vytvořena v Zásilkovně (automaticky po označení jako Zaplacená)</span>
+                  </div>
+                )}
+              </div>
+
               <h3 className="font-bold text-lg mb-4 border-b border-outline-variant/20 pb-2">Položky</h3>
               <div className="space-y-4 mb-6">
                  {selectedOrderDetails.items?.map(i => (

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../lib/db-drizzle.js';
-import { orders, order_items, coupons, products } from '../../../lib/schema.js';
+import { orders, order_items, coupons, products, settings } from '../../../lib/schema.js';
 import { authenticateToken } from '../../../lib/auth.js';
 import { eq, and, desc, sql, inArray } from 'drizzle-orm';
 import qrcode from 'qrcode';
@@ -27,7 +27,10 @@ export async function GET(request) {
 // POST /api/orders — create order
 export async function POST(request) {
   try {
-    const { customerName, email, address, totalAmount, items, couponCode } = await request.json();
+    const { 
+      customerName, email, address, totalAmount, items, couponCode,
+      shippingMethod, packetaPointId, packetaPointName, deliveryAddress
+    } = await request.json();
 
     const orderResult = await db.transaction(async (tx) => {
       let finalAmount = Number(totalAmount);
@@ -48,6 +51,19 @@ export async function POST(request) {
         }
       }
 
+      // Doprava se přičítá až ZCELA NAKONEC, po odečtení slevy
+      let shippingPrice = 0;
+      if (shippingMethod === 'packeta_zbox' || shippingMethod === 'home_delivery') {
+         const keyToFetch = shippingMethod === 'packeta_zbox' ? 'price_packeta_zbox' : 'price_packeta_home';
+         const [settingRow] = await tx.select().from(settings).where(eq(settings.key, keyToFetch));
+         if (settingRow && settingRow.value) {
+            shippingPrice = Number(settingRow.value);
+         } else {
+            shippingPrice = shippingMethod === 'packeta_zbox' ? 95 : 140; // Default fallback
+         }
+      }
+      finalAmount = finalAmount + shippingPrice;
+
       finalAmount = Math.round(finalAmount * 100);
 
       const [newOrder] = await tx.insert(orders).values({
@@ -55,7 +71,11 @@ export async function POST(request) {
         email,
         address: address || '',
         totalAmount: finalAmount,
-        coupon_id: couponId
+        coupon_id: couponId,
+        shippingMethod: shippingMethod || 'pickup',
+        packetaPointId: packetaPointId || null,
+        packetaPointName: packetaPointName || null,
+        deliveryAddress: deliveryAddress || null,
       }).returning();
 
       if (items && items.length > 0) {
